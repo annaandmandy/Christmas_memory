@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>!FLIP OUR MEMORIES!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #b61d2c;
+      --deep-red: #7f0f1f;
+      --green: #1e6b43;
+      --mint: #dff5e3;
+      --gold: #f0c266;
+      --cream: #fff6ea;
+      --shadow: rgba(21, 18, 18, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Fraunces", "Times New Roman", serif;
+      color: #2c1a1a;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.5) 0 30%, transparent 32%) 0 0 / 120px 120px,
+        radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.45) 0 26%, transparent 30%) 0 0 / 160px 160px,
+        linear-gradient(135deg, #0f3d2c 0%, #195239 35%, #7a1b2b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 48px;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      display: grid;
+      gap: 16px;
+    }
+
+    header {
+      background: rgba(255, 246, 234, 0.9);
+      border: 2px solid rgba(240, 194, 102, 0.6);
+      border-radius: 24px;
+      padding: 16px 20px;
+      box-shadow: 0 16px 30px var(--shadow);
+      display: grid;
+      gap: 16px;
+    }
+
+    .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title {
+      font-family: "Mountains of Christmas", "Fraunces", serif;
+      font-size: clamp(2rem, 2vw + 1.5rem, 3.2rem);
+      color: var(--deep-red);
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: #3a2a2a;
+      font-size: 1rem;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.95rem;
+    }
+
+    .stat {
+      background: var(--mint);
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: 1px solid rgba(30, 107, 67, 0.3);
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      background: var(--red);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(182, 29, 44, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(182, 29, 44, 0.4);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: clamp(10px, 1.4vw, 14px);
+      padding: clamp(12px, 1.6vw, 18px);
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 26px;
+      border: 2px solid rgba(240, 194, 102, 0.5);
+      box-shadow: 0 18px 40px var(--shadow);
+      width: min(92vmin, 980px);
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      perspective: 1200px;
+    }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+    }
+
+    .card.is-flipped .card-inner,
+    .card.is-matched .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      backface-visibility: hidden;
+      overflow: hidden;
+      border: 2px solid rgba(30, 107, 67, 0.25);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    .card-front {
+      background: linear-gradient(145deg, #fdf2e6, #e9f4ea);
+      display: grid;
+      place-items: center;
+    }
+
+    .card-front::before {
+      content: "☆";
+      font-size: 2.4rem;
+      color: var(--gold);
+      text-shadow: 0 4px 8px rgba(240, 194, 102, 0.6);
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: #ffffff;
+      display: grid;
+      place-items: center;
+    }
+
+    .card-back img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card.is-matched .card-face {
+      border-color: rgba(240, 194, 102, 0.8);
+      box-shadow: 0 0 0 3px rgba(240, 194, 102, 0.35);
+    }
+
+    .message {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--green);
+      min-height: 1.5rem;
+    }
+
+    @media (max-width: 780px) {
+      .board {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .stats {
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 18px 16px;
+      }
+
+      .board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="title-row">
+        <div>
+          <div class="title">FLIP MEMORIES</div>
+          <div class="subtitle">Find two photos from the same place and complete the matching of 8 groups.</div>
+        </div>
+        <div class="controls">
+          <button type="button" id="resetBtn">Restart</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat">steps: <span id="moves">0</span></div>
+        <div class="stat">time: <span id="time">00:00</span></div>
+        <div class="stat">match: <span id="matches">0</span>/8</div>
+      </div>
+      <div class="message" id="message"></div>
+    </header>
+
+    <section class="board" id="board" aria-live="polite"></section>
+  </main>
+
+  <script>
+    const board = document.getElementById("board");
+    const resetBtn = document.getElementById("resetBtn");
+    const movesEl = document.getElementById("moves");
+    const timeEl = document.getElementById("time");
+    const matchesEl = document.getElementById("matches");
+    const messageEl = document.getElementById("message");
+
+    const pairSources = Array.from({ length: 8 }, (_, i) => {
+      const folder = i + 1;
+      return [
+        { pairId: folder, src: `game_photos/${folder}/a.jpg` },
+        { pairId: folder, src: `game_photos/${folder}/b.jpg` },
+      ];
+    }).flat();
+
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let moves = 0;
+    let matches = 0;
+    let timerId = null;
+    let seconds = 0;
+
+    const shuffle = (array) => {
+      const result = [...array];
+      for (let i = result.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    };
+
+    const formatTime = (value) => {
+      const mins = String(Math.floor(value / 60)).padStart(2, "0");
+      const secs = String(value % 60).padStart(2, "0");
+      return `${mins}:${secs}`;
+    };
+
+    const startTimer = () => {
+      if (timerId) return;
+      timerId = setInterval(() => {
+        seconds += 1;
+        timeEl.textContent = formatTime(seconds);
+      }, 1000);
+    };
+
+    const stopTimer = () => {
+      clearInterval(timerId);
+      timerId = null;
+    };
+
+    const updateStats = () => {
+      movesEl.textContent = String(moves);
+      matchesEl.textContent = String(matches);
+    };
+
+    const showMessage = (text, tone = "") => {
+      messageEl.textContent = text;
+      messageEl.style.color = tone === "success" ? "#1e6b43" : "#7f0f1f";
+    };
+
+    const createCard = ({ pairId, src }, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "card";
+      card.dataset.pair = String(pairId);
+      card.dataset.index = String(index);
+
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-face card-front"></div>
+          <div class="card-face card-back">
+            <img src="${src}" alt="From place ${pairId} " />
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("click", () => onCardClick(card));
+      return card;
+    };
+
+    const resetBoardState = () => {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    };
+
+    const handleMatch = () => {
+      matches += 1;
+      updateStats();
+      resetBoardState();
+
+      if (matches === 8) {
+        stopTimer();
+        showMessage(`Finish matching in ${moves} steps! 🎉 time: ${formatTime(seconds)}.`, "success");
+      } else {
+        showMessage("Find two photos from the same place and complete the matching of 8 groups.", "success");
+      }
+    };
+
+    const handleMismatch = () => {
+      lockBoard = true;
+      setTimeout(() => {
+        firstCard.classList.remove("is-flipped");
+        secondCard.classList.remove("is-flipped");
+        resetBoardState();
+      }, 900);
+    };
+
+    const onCardClick = (card) => {
+      if (lockBoard) return;
+      if (card.classList.contains("is-flipped") || card.classList.contains("is-matched")) return;
+
+      startTimer();
+      card.classList.add("is-flipped");
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      secondCard = card;
+      moves += 1;
+      updateStats();
+
+      const isMatch = firstCard.dataset.pair === secondCard.dataset.pair;
+      if (isMatch) {
+        firstCard.classList.add("is-matched");
+        secondCard.classList.add("is-matched");
+        handleMatch();
+      } else {
+        showMessage("Try again!");
+        handleMismatch();
+      }
+    };
+
+    const renderBoard = () => {
+      const shuffled = shuffle(pairSources);
+      board.innerHTML = "";
+      shuffled.forEach((card, index) => {
+        board.appendChild(createCard(card, index));
+      });
+    };
+
+    const resetGame = () => {
+      stopTimer();
+      seconds = 0;
+      moves = 0;
+      matches = 0;
+      timeEl.textContent = formatTime(seconds);
+      updateStats();
+      showMessage("let's start!", "success");
+      resetBoardState();
+      renderBoard();
+    };
+
+    resetBtn.addEventListener("click", resetGame);
+
+    resetGame();
+  </script>
+</body>
+</html>
