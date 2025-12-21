@@ -118,7 +118,7 @@
 <body>
 
     <div id="ui-layer">
-        <div class="instruction">滾輪/雙指前進 · 觀賞四季藝廊</div>
+        <div class="instruction">Use scroll/2-finger hold to navigate.</div>
     </div>
 
     <!-- Permission Overlay (Required for iOS) -->
@@ -240,7 +240,9 @@
 
         // Mobile Logic Variables
         let isTwoFingerTouching = false;
-        let initialAlpha = null;
+        let isMobile = false;
+        let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
+        let screenOrientation = 0;
 
         function init() {
             scene = new THREE.Scene();
@@ -889,15 +891,37 @@
                 sys.mesh.geometry.attributes.position.needsUpdate = true;
             });
 
-            lat = Math.max(-85, Math.min(85, lat));
-            let phi = THREE.MathUtils.degToRad(90 - lat);
-            let theta = THREE.MathUtils.degToRad(lon);
-            camera.position.set(0, 0, cameraZ);
-            camera.lookAt(
-                500 * Math.sin(phi) * Math.cos(theta),
-                500 * Math.cos(phi),
-                500 * Math.sin(phi) * Math.sin(theta) + cameraZ
-            );
+            // Quaternion helper
+            const setObjectQuaternion = function () {
+                const zee = new THREE.Vector3(0, 0, 1);
+                const euler = new THREE.Euler();
+                const q0 = new THREE.Quaternion();
+                const q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
+                return function (quaternion, alpha, beta, gamma, orient) {
+                    euler.set(beta, alpha, - gamma, 'YXZ');
+                    quaternion.setFromEuler(euler);
+                    quaternion.multiply(q1);
+                    quaternion.multiply(q0.setFromAxisAngle(zee, - orient));
+                };
+            }();
+
+            if (isMobile && deviceOrientation.alpha !== null) {
+                const alpha = deviceOrientation.alpha ? THREE.MathUtils.degToRad(deviceOrientation.alpha) : 0;
+                const beta = deviceOrientation.beta ? THREE.MathUtils.degToRad(deviceOrientation.beta) : 0;
+                const gamma = deviceOrientation.gamma ? THREE.MathUtils.degToRad(deviceOrientation.gamma) : 0;
+                const orient = screenOrientation ? THREE.MathUtils.degToRad(screenOrientation) : 0;
+                setObjectQuaternion(camera.quaternion, alpha, beta, gamma, orient);
+            } else {
+                lat = Math.max(-85, Math.min(85, lat));
+                let phi = THREE.MathUtils.degToRad(90 - lat);
+                let theta = THREE.MathUtils.degToRad(lon);
+                camera.position.set(0, 0, cameraZ);
+                camera.lookAt(
+                    500 * Math.sin(phi) * Math.cos(theta),
+                    500 * Math.cos(phi),
+                    500 * Math.sin(phi) * Math.sin(theta) + cameraZ
+                );
+            }
             renderer.render(scene, camera);
         }
 
