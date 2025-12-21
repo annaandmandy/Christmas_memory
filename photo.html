@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2024 年度摄影集 | My British Anthology</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --british-green: #1B3022;
+            --cream: #F5F2ED;
+            --gold: #C5A059;
+            --charcoal: #262626;
+        }
+
+        body {
+            background-color: var(--british-green);
+            color: var(--cream);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .page-section {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start;
+        }
+
+        .container-snap {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* 装饰元素 */
+        .border-frame {
+            position: absolute;
+            top: 20px; bottom: 20px; left: 20px; right: 20px;
+            border: 1px solid rgba(197, 160, 89, 0.2);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 图片框架样式 */
+        .photo-frame {
+            position: relative;
+            background: #fff;
+            padding: 8px 8px 30px 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transition: all 0.5s ease;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .photo-caption {
+            position: absolute;
+            bottom: 6px;
+            left: 8px;
+            color: #444;
+            font-size: 0.6rem;
+            font-style: italic;
+        }
+
+        /* Tailwind-like utility helpers for custom colors */
+        .text-gold { color: var(--gold); }
+        .bg-gold { background-color: var(--gold); }
+        .border-gold { border-color: var(--gold); }
+        .hover\:bg-gold:hover { background-color: var(--gold); }
+        .hover\:text-white:hover { color: #fff; }
+
+        /* 章节标题样式 */
+        .section-title {
+            font-size: 3rem;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        /* 网格排版 */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        /* 人像网格：固定方形，避免错位 */
+        .portrait-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+            width: 92%;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 1024px) {
+            .portrait-grid {
+                width: 70%;
+                max-width: 760px;
+                gap: 2rem;
+            }
+        }
+
+        .portrait-grid .photo-frame {
+            padding: 0;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .portrait-grid .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .portrait-grid .round {
+            border-radius: 50%;
+        }
+
+        /* 错位排版容器 */
+        .asymmetric-layout {
+            position: relative;
+            width: 90%;
+            height: 60vh;
+        }
+
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { display: none; }
+
+        /* 动画提示 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            animation: bounce 2s infinite;
+            z-index: 20;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-snap">
+    <!-- 0. 封面页 -->
+    <section class="page-section">
+        <div class="border-frame"></div>
+        <div class="text-center z-20 px-8">
+            <p class="subtitle mb-4">An Annual Collection</p>
+            <h1 class="section-title text-6xl">2024</h1>
+            <h2 class="serif text-2xl italic mb-8">Memories in London Mist</h2>
+            <div class="w-12 h-px bg-gold mx-auto mb-8" style="background-color: var(--gold);"></div>
+            <p class="text-xs leading-loose tracking-widest opacity-60">
+                拾起时间的碎片<br>
+                拼凑这一年的光影纪录
+            </p>
+        </div>
+        <div class="scroll-hint">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold);"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+        </div>
+    </section>
+
+    <!-- 1.1 春 (封面) -->
+    <section class="page-section" style="background-color: #2D3E33;">
+        <div class="absolute top-8 left-8 text-gold opacity-10 serif text-9xl">01</div>
+        <div class="z-20 w-full px-10">
+            <h2 class="section-title text-4xl mb-2">Spring</h2>
+            <p class="subtitle mb-10 italic">The Awakening</p>
+            <div class="photo-frame w-[85%] mx-auto" style="transform: rotate(-1deg);">
+                <img src="spring_main.jpg" alt="Spring Cover" onerror="this.src='https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=600&q=80'">
+                <div class="photo-caption serif">Hyde Park, 2024</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 1.2 春 (网格) -->
+    <section class="page-section" style="background-color: #2D3E33;">
+        <div class="photo-grid">
+            <div class="photo-frame" style="transform: rotate(2deg);"><img src="spring1.jpg" onerror="this.src='https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-8" style="transform: rotate(-3deg);"><img src="spring2.jpg" onerror="this.src='https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame" style="transform: rotate(-1deg);"><img src="spring3.jpg" onerror="this.src='https://images.unsplash.com/photo-1554494583-c4e1649bfe71?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-4" style="transform: rotate(4deg);"><img src="spring4.jpg" onerror="this.src='https://images.unsplash.com/photo-1455208111761-aa31835ffb3d?auto=format&fit=crop&w=300&q=80'"></div>
+        </div>
+    </section>
+
+    <!-- 1.3 春 (叙事 - 新增) -->
+    <section class="page-section" style="background-color: #2D3E33;">
+        <div class="asymmetric-layout">
+            <div class="photo-frame absolute top-0 left-0 w-2/3 z-10">
+                <img src="spring_story1.jpg" onerror="this.src='https://images.unsplash.com/photo-1521033335978-f1ca5b7c17c5?auto=format&fit=crop&w=400&q=80'">
+            </div>
+            <div class="photo-frame absolute bottom-0 right-0 w-1/2 z-20">
+                <img src="spring_story2.jpg" onerror="this.src='https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=300&q=80'">
+            </div>
+        </div>
+        <p class="mt-8 text-xs italic opacity-60 serif">Bloom where you are planted.</p>
+    </section>
+
+    <!-- 2.1 夏 (封面) -->
+    <section class="page-section" style="background-color: #1E2A38;">
+        <div class="absolute top-8 right-8 text-gold opacity-10 serif text-9xl">02</div>
+        <div class="z-20 w-full px-10">
+            <h2 class="section-title text-4xl mb-2 text-right">Summer</h2>
+            <p class="subtitle mb-10 text-right italic">Eternal Sunshine</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="photo-frame mt-12"><img src="summer_m1.jpg" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80'"></div>
+                <div class="photo-frame"><img src="summer_m2.jpg" onerror="this.src='https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=300&q=80'"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2.2 夏 (网格) -->
+    <section class="page-section" style="background-color: #1E2A38;">
+        <div class="photo-grid">
+            <div class="photo-frame"><img src="summer1.jpg" onerror="this.src='https://images.unsplash.com/photo-1501426026826-31c667bdf23d?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-6"><img src="summer2.jpg" onerror="this.src='https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame -mt-4"><img src="summer3.jpg" onerror="this.src='https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-2"><img src="summer4.jpg" onerror="this.src='https://images.unsplash.com/photo-1502791451862-7bd8c1df43a7?auto=format&fit=crop&w=300&q=80'"></div>
+        </div>
+    </section>
+
+    <!-- 2.3 夏 (叙事 - 新增) -->
+    <section class="page-section" style="background-color: #1E2A38;">
+        <div class="asymmetric-layout">
+            <div class="photo-frame absolute top-0 right-4 w-3/4">
+                <img src="summer_story1.jpg" onerror="this.src='https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=500&q=80'">
+            </div>
+            <div class="absolute bottom-10 left-10 text-gold italic text-sm serif tracking-widest">
+                Blue Sky & Salty Air
+            </div>
+        </div>
+    </section>
+
+    <!-- 3.1 秋 (封面) -->
+    <section class="page-section" style="background-color: #3D2B1F;">
+        <div class="absolute bottom-8 left-8 text-gold opacity-10 serif text-9xl">03</div>
+        <div class="z-20 w-full px-10">
+            <h2 class="section-title text-4xl mb-2">Autumn</h2>
+            <p class="subtitle mb-10 italic">Amber Leaves</p>
+            <div class="photo-frame w-4/5 max-w-[520px] mx-auto">
+                <img src="autumn_main.jpg" onerror="this.src='https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&q=80'">
+                <div class="photo-caption serif">Oxfordshire, October</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3.2 秋 (网格) -->
+    <section class="page-section" style="background-color: #3D2B1F;">
+        <div class="photo-grid">
+            <div class="photo-frame" style="transform: rotate(-2deg);"><img src="autumn1.jpg" onerror="this.src='https://images.unsplash.com/photo-1444492414113-ad3e40177d00?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-4"><img src="autumn2.jpg" onerror="this.src='https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame -mt-2" style="transform: rotate(3deg);"><img src="autumn3.jpg" onerror="this.src='https://images.unsplash.com/photo-1470252649358-96949c75677f?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-6"><img src="autumn4.jpg" onerror="this.src='https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=300&q=80'"></div>
+        </div>
+    </section>
+
+    <!-- 3.3 秋 (叙事 - 新增) -->
+    <section class="page-section" style="background-color: #3D2B1F;">
+        <div class="asymmetric-layout flex justify-center items-center">
+            <div class="photo-frame w-4/5 transform -rotate-1">
+                <img src="autumn_story1.jpg" onerror="this.src='https://images.unsplash.com/photo-1507567330391-1f274360ecee?auto=format&fit=crop&w=500&q=80'">
+                <div class="photo-caption serif">Falling quietly into the gold.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4.1 冬 (封面) -->
+    <section class="page-section" style="background-color: var(--charcoal);">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gold opacity-5 serif text-[15rem]">04</div>
+        <div class="z-20 w-full px-10 text-center">
+            <h2 class="section-title text-4xl mb-2">Winter</h2>
+            <p class="subtitle mb-12 italic">Silent Frost</p>
+            <div class="photo-frame w-[70%] mx-auto" style="border: 10px solid #fff;">
+                <img src="winter_main.jpg" onerror="this.src='https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=600&q=80'">
+            </div>
+        </div>
+    </section>
+
+    <!-- 4.2 冬 (网格) -->
+    <section class="page-section" style="background-color: var(--charcoal);">
+        <div class="photo-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="photo-frame" style="grid-column: span 2;"><img src="winter1.jpg" onerror="this.src='https://images.unsplash.com/photo-1477601263399-79667821d492?auto=format&fit=crop&w=500&q=80'"></div>
+            <div class="photo-frame mt-4"><img src="winter2.jpg" onerror="this.src='https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame mt-4"><img src="winter3.jpg" onerror="this.src='https://images.unsplash.com/photo-1454179083322-198bb4da816b?auto=format&fit=crop&w=300&q=80'"></div>
+        </div>
+    </section>
+
+    <!-- 4.3 冬 (叙事 - 新增) -->
+    <section class="page-section" style="background-color: var(--charcoal);">
+        <div class="w-full px-12 flex flex-col items-start">
+            <div class="photo-frame w-3/4 mb-4">
+                <img src="winter_story1.jpg" onerror="this.src='https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=400&q=80'">
+            </div>
+            <div class="serif italic text-gold text-right w-full pr-10">Winter whispers.</div>
+        </div>
+    </section>
+
+    <!-- 5.1 人像 (封面) -->
+    <section class="page-section" style="background-color: var(--cream); color: var(--british-green);">
+        <div class="border-frame" style="border-color: rgba(27, 48, 34, 0.1);"></div>
+        <div class="z-20 w-full px-10 text-center">
+            <h2 class="section-title text-4xl mb-2" style="color: var(--british-green);">Portraits</h2>
+            <p class="subtitle mb-12" style="color: var(--gold);">Echoes of Soul</p>
+            <div class="photo-frame inline-block" style="padding-bottom: 40px; transform: rotate(1deg);">
+                <img src="portrait_main.jpg" onerror="this.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80'" style="filter: grayscale(100%);">
+                <div class="photo-caption serif" style="bottom: 12px;">Portrayal of Time</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5.2 人像 (网格) -->
+    <section class="page-section" style="background-color: var(--cream);">
+        <div class="portrait-grid">
+            <div class="photo-frame round"><img src="p1.jpg" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame"><img src="p2.jpg" onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame"><img src="p3.jpg" onerror="this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'"></div>
+            <div class="photo-frame round"><img src="p4.jpg" onerror="this.src='https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=300&q=80'"></div>
+        </div>
+    </section>
+
+    <!-- 5.3 人像 (叙事 - 新增) -->
+    <section class="page-section" style="background-color: var(--cream);">
+        <div class="w-full px-10">
+            <div class="photo-frame w-full h-[60vh]">
+                <img src="p_story.jpg" onerror="this.src='https://images.unsplash.com/photo-1520333789090-1afc82db536a?auto=format&fit=crop&w=600&q=80'">
+                <div class="photo-caption serif">The reflection of a self.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. 封底 -->
+    <section class="page-section">
+        <div class="text-center">
+            <h3 class="serif italic text-2xl mb-4 text-gold">Fin.</h3>
+            <div class="w-8 h-px bg-gold mx-auto mb-6 opacity-40"></div>
+            <p class="text-[10px] tracking-[0.4em] opacity-40 uppercase">A Year of Vision | 2024</p>
+            <div class="mt-16">
+                <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="border border-gold px-8 py-3 text-xs tracking-[0.2em] hover:bg-gold hover:text-white transition-all uppercase">
+                    Return to Start
+                </button>
+            </div>
+        </div>
+        <div class="absolute bottom-10 text-[8px] opacity-20 tracking-tighter">
+            PRODUCED BY GEMINI | BRITISH ANTHOLOGY SERIES
+        </div>
+    </section>
+</div>
+
+</body>
+</html>
