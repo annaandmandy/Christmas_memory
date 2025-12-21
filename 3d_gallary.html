@@ -241,8 +241,7 @@
         // Mobile Logic Variables
         let isTwoFingerTouching = false;
         let isMobile = false;
-        let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
-        let screenOrientation = 0;
+        let baseAlpha = null;
 
         function init() {
             scene = new THREE.Scene();
@@ -780,35 +779,46 @@
             }
         }
         // --- Mobile Logic Functions ---
+        // --- Mobile Logic Functions ---
         function requestOrientationPermission() {
+            if (!window.isSecureContext) {
+                alert("HTTPS is required for Gyroscope.");
+                return;
+            }
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                            document.getElementById('permission-overlay').style.display = 'none';
-                        } else {
-                            alert("Permission denied. You can still use touch swipe.");
-                            document.getElementById('permission-overlay').style.display = 'none';
-                        }
-                    })
-                    .catch(console.error);
+                Promise.all([
+                    DeviceOrientationEvent.requestPermission(),
+                    (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function')
+                        ? DeviceMotionEvent.requestPermission()
+                        : Promise.resolve('granted')
+                ]).then(([orientationState, motionState]) => {
+                    if (orientationState === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        document.getElementById('permission-overlay').style.display = 'none';
+                    } else {
+                        alert("Permission denied.");
+                        document.getElementById('permission-overlay').style.display = 'none';
+                    }
+                }).catch(console.error);
             } else {
+                window.addEventListener('deviceorientation', handleOrientation);
                 document.getElementById('permission-overlay').style.display = 'none';
             }
         }
 
         function handleOrientation(event) {
-            if (event.alpha === null || event.beta === null) return;
-            if (initialAlpha === null) initialAlpha = event.alpha;
-
-            // Simple mapping for portrait mode: beta-90 is vertical tilt
-            let newLat = Math.max(-85, Math.min(85, event.beta - 90));
-            // alpha is compass
-            let relativeAlpha = event.alpha - initialAlpha;
-
-            lat = newLat;
-            lon = -relativeAlpha;
+            // Using user reference logic
+            if (isUserInteracting) return;
+            if (baseAlpha === null && event.alpha !== null) {
+                baseAlpha = event.alpha;
+            }
+            if (event.alpha !== null) {
+                // In reference: lon = alpha - baseAlpha
+                // We apply this directly but watch for inversion if needed.
+                // Standard gyro look around:
+                lon = (baseAlpha - event.alpha);
+                lat = (event.beta - 90);
+            }
         }
 
         function initMobileControls() {
@@ -859,31 +869,26 @@
         function animate() { requestAnimationFrame(animate); update(); }
 
         function update() {
-            // Handle 2-Finger Movement Directionally
-            if (isTwoFingerTouching) {
-                const dir = new THREE.Vector3();
-                camera.getWorldDirection(dir);
-                // Move along Z based on looking direction (ignore Y/X for gallery path)
-                // Speed factor 15
-                targetZ += dir.z * 15;
-            }
-
+            // Camera Position Logic (Shared)
             cameraZ += (targetZ - cameraZ) * 0.1;
             const maxDepth = -(4 * SEASON_LENGTH) - 1000;
             if (cameraZ > 350) { cameraZ = 350; targetZ = 350; }
             if (cameraZ < maxDepth) { cameraZ = maxDepth; targetZ = maxDepth; }
+            camera.position.set(0, 0, cameraZ);
+
+            // Handle 2-Finger Movement Directionally
+            if (isTwoFingerTouching) {
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
+                targetZ += dir.z * 15;
+            }
 
             // Particles Animation
             particles.forEach(sys => {
                 const positions = sys.mesh.geometry.attributes.position.array;
                 for (let i = 0; i < 300; i++) {
                     positions[i * 3 + 1] -= sys.speeds[i]; // move down
-
-                    if (positions[i * 3 + 1] < -250) {
-                        positions[i * 3 + 1] = 250;
-                    }
-
-                    // Drift for leaves/snow
+                    if (positions[i * 3 + 1] < -250) { positions[i * 3 + 1] = 250; }
                     if (sys.type === 'winter' || sys.type === 'autumn' || sys.type === 'spring') {
                         positions[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.5;
                     }
@@ -891,39 +896,20 @@
                 sys.mesh.geometry.attributes.position.needsUpdate = true;
             });
 
-            // Quaternion helper
-            const setObjectQuaternion = function () {
-                const zee = new THREE.Vector3(0, 0, 1);
-                const euler = new THREE.Euler();
-                const q0 = new THREE.Quaternion();
-                const q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
-                return function (quaternion, alpha, beta, gamma, orient) {
-                    euler.set(beta, alpha, - gamma, 'YXZ');
-                    quaternion.setFromEuler(euler);
-                    quaternion.multiply(q1);
-                    quaternion.multiply(q0.setFromAxisAngle(zee, - orient));
-                };
-            }();
+            // Camera Rotation (Lat/Lon)
+            lat = Math.max(-85, Math.min(85, lat));
+            let phi = THREE.MathUtils.degToRad(90 - lat);
+            let theta = THREE.MathUtils.degToRad(lon);
 
-            if (isMobile && deviceOrientation.alpha !== null) {
-                const alpha = deviceOrientation.alpha ? THREE.MathUtils.degToRad(deviceOrientation.alpha) : 0;
-                const beta = deviceOrientation.beta ? THREE.MathUtils.degToRad(deviceOrientation.beta) : 0;
-                const gamma = deviceOrientation.gamma ? THREE.MathUtils.degToRad(deviceOrientation.gamma) : 0;
-                const orient = screenOrientation ? THREE.MathUtils.degToRad(screenOrientation) : 0;
-                setObjectQuaternion(camera.quaternion, alpha, beta, gamma, orient);
-            } else {
-                lat = Math.max(-85, Math.min(85, lat));
-                let phi = THREE.MathUtils.degToRad(90 - lat);
-                let theta = THREE.MathUtils.degToRad(lon);
-                camera.position.set(0, 0, cameraZ);
-                camera.lookAt(
-                    500 * Math.sin(phi) * Math.cos(theta),
-                    500 * Math.cos(phi),
-                    500 * Math.sin(phi) * Math.sin(theta) + cameraZ
-                );
-            }
+            camera.lookAt(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta) + cameraZ
+            );
+
             renderer.render(scene, camera);
         }
+
 
         // Start initialization after all definitions are ready
         init();
