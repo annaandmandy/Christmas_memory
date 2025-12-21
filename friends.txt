@@ -1,0 +1,50 @@
+const friendsData = [
+            { 
+                name: "Carrie", 
+                title: "Chief Cocoa Officer", 
+                file: '3d_images/carrie.jpg', 
+                desc: "Once ate a whole chocolate fondue fountain by herself. Stocks went up." 
+            },
+            { 
+                name: "Anna", 
+                title: "The Dairy Gambler", 
+                file: '3d_images/anna.jpg', 
+                desc: "Will risk it all for a slice of tiramisu. Brave soul." 
+            },
+            { 
+                name: "Winni", 
+                title: "CEO of 3AM", 
+                file: '3d_images/winni.jpg', 
+                desc: "Hasn't seen the sun since 2024. Operates purely on moonlight." 
+            },
+            { 
+                name: "Aska", 
+                title: "The Tear Vending Machine", 
+                file: '3d_images/aska.jpg', 
+                desc: "Fluent in multiple languages, but cries in universal. A pure soul who needs a tissue subscription." 
+            },
+            { 
+                name: "Carlos", 
+                title: "Lord of Time", 
+                file: '3d_images/carlos.jpg', 
+                desc: "Juggles jobs, dating, TAing, and gaming simultaneously. Rumor has it he discovered the 25th hour of the day."
+            },
+            { 
+                name: "Anthony", 
+                title: "The Hotpot Evangelist", 
+                file: '3d_images/anthony.jpg', 
+                desc: "Survives on broccoli and chicken breast just to inhale a whole pizza later. His love language is spamming 'HOTPOT?' in the group chat." 
+            },
+            { 
+                name: "Erioe", 
+                title: "The Fragrant Carry", 
+                file: '3d_images/erioe.jpg', 
+                desc: "A fashion icon with a PhD in perfumes. He treats every hallway like a runway and always smells expensive."
+            },
+           { 
+                name: "Aimee", 
+                title: "The Marathon Caller", 
+                file: '3d_images/aimee.jpg', 
+                desc: "Queen of deals and 3-hour daily calls with her bf. A long-distance warrior who spams us with her boyfriend's cat photos." 
+            }
+        ];

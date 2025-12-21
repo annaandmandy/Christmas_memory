@@ -3,222 +3,524 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D记忆展厅 - 增强兼容版</title>
+    <title>2025 四季時光藝廊 (修復版)</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #0d0d0d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
         #ui-layer {
-            position: fixed;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            pointer-events: none;
-            z-index: 10;
+            position: fixed; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; z-index: 10;
         }
         .instruction {
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            letter-spacing: 1px;
-            display: inline-block;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; letter-spacing: 1px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);
         }
-        #gyro-button {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 14px 28px;
-            background: #d4a373;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 20;
-            transition: all 0.3s ease;
+
+        /* 彈出視窗樣式 */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            z-index: 100; display: none;
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-        #gyro-button:active {
-            transform: translateX(-50%) scale(0.95);
-            background: #b88b5d;
+        #modal-content {
+            background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 15px;
+            text-align: center; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
-        #message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 30px;
-            border-radius: 15px;
-            text-align: center;
-            display: none;
-            z-index: 100;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 80%;
-            max-width: 300px;
+        #modal-img {
+            width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        #message-box p { color: #333; margin-bottom: 20px; font-size: 14px; line-height: 1.6; }
-        #message-box button {
-            background: #d4a373;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 20px;
-            cursor: pointer;
+        #modal-name { font-size: 24px; font-weight: bold; margin: 0; color: #333; }
+        #modal-title { font-size: 16px; color: #d4a373; font-weight: bold; margin: 5px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; }
+        #modal-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+        #close-btn {
+            background: #333; color: white; border: none; padding: 10px 30px; border-radius: 25px;
+            cursor: pointer; font-weight: bold; font-size: 14px;
         }
-        #error-msg {
-            position: fixed;
-            top: 60px;
-            width: 100%;
-            text-align: center;
-            color: #ff4d4d;
-            font-size: 10px;
-            z-index: 15;
-            display: none;
-        }
-        canvas { display: block; }
+        
+        canvas { cursor: grab; }
+        canvas:active { cursor: grabbing; }
     </style>
 </head>
 <body>
 
     <div id="ui-layer">
-        <div class="instruction">滑动旋转视角 · 双指捏合缩放</div>
+        <div class="instruction">滾輪/雙指前進 · 觀賞四季藝廊</div>
     </div>
-    
-    <div id="error-msg">提示：重力感应需要 HTTPS 环境支持</div>
-    
-    <div id="message-box">
-        <p id="msg-text">开启重力感应可以获得更好的沉浸式体验哦！</p>
-        <button onclick="closeMsg()">我知道了</button>
+
+    <div id="modal-overlay" onclick="closeModal()">
+        <div id="modal-content" onclick="event.stopPropagation()">
+            <img id="modal-img" src="" alt="Friend Photo">
+            <h2 id="modal-name">Name</h2>
+            <div id="modal-title">Title</div>
+            <p id="modal-desc">Description</p>
+            <button id="close-btn" onclick="closeModal()">Close</button>
+        </div>
     </div>
-    
-    <button id="gyro-button">点击开启感应浏览</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <script>
+        // --- 1. 資料區 ---
+        const friendsData = [
+            { 
+                name: "Carrie", 
+                title: "Chief Cocoa Officer", 
+                file: '3d_images/carrie.jpg', 
+                desc: "Once ate a whole chocolate fondue fountain by herself. Stocks went up." 
+            },
+            { 
+                name: "Anna", 
+                title: "The Dairy Gambler", 
+                file: '3d_images/anna.jpg', 
+                desc: "Will risk it all for a slice of tiramisu. Brave soul." 
+            },
+            { 
+                name: "Winni", 
+                title: "CEO of 3AM", 
+                file: '3d_images/winni.jpg', 
+                desc: "Hasn't seen the sun since 2024. Operates purely on moonlight." 
+            },
+            { 
+                name: "Aska", 
+                title: "The Tear Vending Machine", 
+                file: '3d_images/aska.jpg', 
+                desc: "Fluent in multiple languages, but cries in universal. A pure soul who needs a tissue subscription." 
+            },
+            { 
+                name: "Carlos", 
+                title: "Lord of Time", 
+                file: '3d_images/carlos.jpg', 
+                desc: "Juggles jobs, dating, TAing, and gaming simultaneously. Rumor has it he discovered the 25th hour of the day."
+            },
+            { 
+                name: "Anthony", 
+                title: "The Hotpot Evangelist", 
+                file: '3d_images/anthony.jpg', 
+                desc: "Survives on broccoli and chicken breast just to inhale a whole pizza later. His love language is spamming 'HOTPOT?' in the group chat." 
+            },
+            { 
+                name: "Erioe", 
+                title: "The Fragrant Carry", 
+                file: '3d_images/erioe.jpg', 
+                desc: "A fashion icon with a PhD in perfumes. He treats every hallway like a runway and always smells expensive."
+            },
+           { 
+                name: "Aimee", 
+                title: "The Marathon Caller", 
+                file: '3d_images/aimee.jpg', 
+                desc: "Queen of deals and 3-hour daily calls with her bf. A long-distance warrior who spams us with her boyfriend's cat photos." 
+            }
+        ];
+
+        // --- 四季配色 (這裡改用更鮮豔一點的顏色，並使用 Basic 材質確保顯示) ---
+        const seasonsConfig = [
+            { 
+                id: "spring", 
+                floor: '#2d6a4f', wall: '#d8f3dc', ceiling: '#b7e4c7', 
+                artFolder: '3d_images/spring'
+            },
+            { 
+                id: "summer", 
+                floor: '#e9c46a', wall: '#caf0f8', ceiling: '#90e0ef', 
+                artFolder: '3d_images/summer'
+            },
+            { 
+                id: "autumn", 
+                floor: '#7f5539', wall: '#faedcd', ceiling: '#fefae0', 
+                artFolder: '3d_images/autumn'
+            },
+            { 
+                id: "winter", 
+                floor: '#4a4e69', wall: '#f1faee', ceiling: '#a8dadc', 
+                artFolder: '3d_images/winter'
+            }
+        ];
+
         let scene, camera, renderer;
-        let lon = 0, lat = 0, phi = 0, theta = 0;
-        let fov = 75;
+        let lon = 0, lat = 0;
+        let cameraZ = 0, targetZ = 0; 
+        
+        // 設定間距
+        const SPACING = 800; // 朋友之間的間距
+        const SEASON_LENGTH = 1200; // 每個季節的長度 (固定長度以方便貼牆壁)
         
         let isUserInteracting = false;
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let onPointerDownLon = 0, onPointerDownLat = 0;
-        let initialPinchDistance = null;
+        let isDragging = false; 
 
-        let baseAlpha = null;
-
-        const imageFiles = [
-            '3d_images/image-01.jpg',
-            '3d_images/image-02.jpg',
-            '3d_images/image-03.jpg',
-            '3d_images/image-04.jpg',
-            '3d_images/image-05.jpg'
-        ];
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const interactableObjects = []; 
 
         init();
         animate();
 
-        function showMsg(text) {
-            document.getElementById('msg-text').innerText = text;
-            document.getElementById('message-box').style.display = 'block';
-        }
-
-        function closeMsg() {
-            document.getElementById('message-box').style.display = 'none';
-        }
-
         function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 1, 1100);
+            scene.fog = new THREE.Fog(0x000000, 200, 3000); 
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
             
-            const geometry = new THREE.BoxGeometry(500, 500, 500);
-            geometry.scale(-1, 1, 1);
+            // 環境光 (雖然改成Basic材質不需要光，但保留給畫框陰影用)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
 
-            const materials = [
-                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 }),
-                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 }),
-                new THREE.MeshBasicMaterial({ color: 0xf3a9c2 }),
-                new THREE.MeshBasicMaterial({ color: 0xfbe2ea }),
-                new THREE.MeshBasicMaterial({ color: 0xf2a0bc }),
-                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 })
-            ];
+            // --- 2. 建立分段式環境 (四季) ---
+            createSeasonalEnvironment();
 
-            const room = new THREE.Mesh(geometry, materials);
-            scene.add(room);
+            // --- 3. 建立朋友星星 ---
+            createFriendStars();
 
-            const loader = new THREE.TextureLoader();
-            imageFiles.forEach((path, index) => {
-                loader.load(path, (texture) => {
-                    const aspect = texture.image.width / texture.image.height;
-                    const imgWidth = 120 * aspect;
-                    const imgHeight = 120;
-                    const painting = createFramedPainting(texture, imgWidth, imgHeight);
+            // --- 4. 建立標準排列的畫框 ---
+            createStandardGallery();
 
-                    const angle = (index / imageFiles.length) * Math.PI * 2;
-                    const radius = 240;
-                    painting.position.set(Math.cos(angle) * radius, 10, Math.sin(angle) * radius);
-                    painting.lookAt(0, 10, 0);
-                    scene.add(painting);
-                });
-            });
-
-            addCeilingText();
-
+            // 渲染器
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
+            // 標題
+            addEntranceText();
+
+            // 事件監聽
+            document.addEventListener('mousedown', onPointerDown, false);
+            document.addEventListener('mousemove', onPointerMove, false);
+            document.addEventListener('mouseup', onPointerUp, false);
             document.addEventListener('touchstart', onTouchStart, { passive: false });
             document.addEventListener('touchmove', onTouchMove, { passive: false });
-            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchend', onTouchEnd, false);
+            document.addEventListener('wheel', onDocumentMouseWheel, { passive: false });
+            window.addEventListener('click', onMouseClick, false);
             window.addEventListener('resize', onWindowResize);
-
-            setupGyro();
         }
 
-        function onTouchStart(event) {
-            if (event.touches.length === 1) {
-                isUserInteracting = true;
-                onPointerDownPointerX = event.touches[0].clientX;
-                onPointerDownPointerY = event.touches[0].clientY;
-                onPointerDownLon = lon;
-                onPointerDownLat = lat;
-            } else if (event.touches.length === 2) {
-                initialPinchDistance = getPinchDistance(event.touches);
+        // --- 核心功能 1: 建立四季環境 (使用 Plane 拼貼，避免黑屏) ---
+        function createSeasonalEnvironment() {
+            // 每個季節有固定的長度
+            // 假設每個季節 2500 單位長，足以容納朋友和畫框
+            const segmentDepth = 1600; 
+
+            seasonsConfig.forEach((season, index) => {
+                // 計算這一段的起點 Z
+                const startZ = -(index * segmentDepth) + 400;
+                const centerZ = startZ - (segmentDepth / 2);
+
+                // 1. 地板 (Floor) - y = -300
+                const floorGeo = new THREE.PlaneGeometry(600, segmentDepth);
+                const floorMat = new THREE.MeshBasicMaterial({ color: season.floor }); // 使用 Basic 確保顏色顯示
+                const floor = new THREE.Mesh(floorGeo, floorMat);
+                floor.rotation.x = -Math.PI / 2;
+                floor.position.set(0, -300, centerZ);
+                scene.add(floor);
+
+                // 2. 天花板 (Ceiling) - y = 300
+                const ceilGeo = new THREE.PlaneGeometry(600, segmentDepth);
+                const ceilMat = new THREE.MeshBasicMaterial({ color: season.ceiling });
+                const ceil = new THREE.Mesh(ceilGeo, ceilMat);
+                ceil.rotation.x = Math.PI / 2;
+                ceil.position.set(0, 300, centerZ);
+                scene.add(ceil);
+
+                // 3. 左牆 (Left Wall) - x = -300
+                const wallGeo = new THREE.PlaneGeometry(segmentDepth, 600);
+                const wallMat = new THREE.MeshBasicMaterial({ color: season.wall });
+                const leftWall = new THREE.Mesh(wallGeo, wallMat);
+                leftWall.rotation.y = Math.PI / 2;
+                leftWall.position.set(-300, 0, centerZ);
+                scene.add(leftWall);
+
+                // 4. 右牆 (Right Wall) - x = 300
+                const rightWall = new THREE.Mesh(wallGeo, wallMat);
+                rightWall.rotation.y = -Math.PI / 2;
+                rightWall.position.set(300, 0, centerZ);
+                scene.add(rightWall);
+
+                // *** 前牆(入口) - 面向走廊內部 ***
+                if (index === 0) {
+                    const frontWallGeo = new THREE.PlaneGeometry(600, 600);
+                    const frontWallMat = new THREE.MeshBasicMaterial({ color: season.wall });
+                    const frontWall = new THREE.Mesh(frontWallGeo, frontWallMat);
+                    frontWall.rotation.y = Math.PI; // 面向 -z (走廊內部)
+                    frontWall.position.set(0, 0, startZ);
+                    scene.add(frontWall);
+                }
+
+                // *** 後牆(出口) - 面向走廊內部 ***
+                if (index === seasonsConfig.length - 1) {
+                    const backWallGeo = new THREE.PlaneGeometry(600, 600);
+                    const backWallMat = new THREE.MeshBasicMaterial({ color: season.wall });
+                    const backWall = new THREE.Mesh(backWallGeo, backWallMat);
+                    // 不需要旋轉,默認面向 -z,正好面向走廊內部
+                    backWall.position.set(0, 0, startZ - segmentDepth);
+                    scene.add(backWall);
+                }
+
+            });
+        }
+
+        // --- 核心功能 2: 建立朋友星星 (解決閃爍問題) ---
+        function createFriendStars() {
+            friendsData.forEach((friend, index) => {
+                const zPos = -index * SPACING;
+
+                const star = createStarMesh(friend.name, friend.title);
+                star.rotation.x = -Math.PI / 2;
+                
+                // *** 關鍵修正 ***
+                // 地板 y = -300
+                // 星星 y = -298 (稍微抬高，避免和地板重疊導致閃爍/消失)
+                star.position.set(0, -298, zPos); 
+                
+                star.userData = { type: 'friend', data: friend };
+                scene.add(star);
+                interactableObjects.push(star);
+            });
+        }
+
+        // --- 核心功能 3: 標準化畫框排列 (左右整齊) ---
+        function createStandardGallery() {
+            const loader = new THREE.TextureLoader();
+            const segmentDepth = 1600; // 必須跟環境長度一致
+
+            seasonsConfig.forEach((season, sIndex) => {
+                // 每個季節放 6 張照片 (左右各3張)
+                const imagesPerSide = 3;
+                const totalImages = imagesPerSide * 2;
+                
+                // 這一個季節的 Z 軸起點
+                const seasonStartZ = -(sIndex * segmentDepth) + 400;
+                
+                // 計算每張圖的間隔
+                const gap = segmentDepth / (imagesPerSide + 1);
+
+                for (let i = 0; i < imagesPerSide; i++) {
+                    const zPos = seasonStartZ - (gap * (i + 1));
+
+                    // 左牆照片
+                    createSingleFrame(
+                        `${season.artFolder}/image-0${i+1}.jpg`, // 路徑
+                        -295, // x (左牆)
+                        0,    // y (高度)
+                        zPos, // z
+                        true, // isLeft
+                        season.floor // 用地板色當預設底色
+                    );
+
+                    // 右牆照片
+                    createSingleFrame(
+                        `${season.artFolder}/image-0${i+4}.jpg`, // 路徑 (從04, 05, 06...)
+                        295,  // x (右牆)
+                        0,    // y
+                        zPos, 
+                        false,// isRight
+                        season.floor
+                    );
+                }
+            });
+            
+            function createSingleFrame(path, x, y, z, isLeft, fallbackColor) {
+                const group = new THREE.Group();
+                group.position.set(x, y, z);
+                group.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+
+                // Create temporary placeholder with default size
+                const defaultWidth = 150;
+                const defaultHeight = 110;
+                const frameThickness = 5;
+                const framePadding = 5;
+
+                // 黑框 (will be replaced after image loads)
+                let frameGeo = new THREE.BoxGeometry(defaultWidth + framePadding * 2, defaultHeight + framePadding * 2, frameThickness);
+                const frameMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
+                let frame = new THREE.Mesh(frameGeo, frameMat);
+                group.add(frame);
+
+                // 畫布 (will be resized after image loads)
+                let canvasGeo = new THREE.PlaneGeometry(defaultWidth, defaultHeight);
+                const canvasMat = new THREE.MeshBasicMaterial({ color: fallbackColor });
+                let painting = new THREE.Mesh(canvasGeo, canvasMat);
+                painting.position.z = 3;
+                group.add(painting);
+
+                // Load image and resize frame based on actual image dimensions
+                loader.load(
+                    path,
+                    (tex) => {
+                        // Get actual image dimensions
+                        const img = tex.image;
+                        const imgWidth = img.width;
+                        const imgHeight = img.height;
+
+                        // Calculate size while maintaining aspect ratio
+                        // Max height is 200 units to fit well on the wall
+                        const maxHeight = 200;
+                        const aspectRatio = imgWidth / imgHeight;
+
+                        let finalHeight = maxHeight;
+                        let finalWidth = finalHeight * aspectRatio;
+
+                        // If width is too large, constrain by width instead
+                        const maxWidth = 250;
+                        if (finalWidth > maxWidth) {
+                            finalWidth = maxWidth;
+                            finalHeight = finalWidth / aspectRatio;
+                        }
+
+                        // Remove old geometries
+                        group.remove(frame);
+                        group.remove(painting);
+
+                        // Create new frame with correct size
+                        frameGeo = new THREE.BoxGeometry(
+                            finalWidth + framePadding * 2,
+                            finalHeight + framePadding * 2,
+                            frameThickness
+                        );
+                        frame = new THREE.Mesh(frameGeo, frameMat);
+                        group.add(frame);
+
+                        // Create new painting with correct size and texture
+                        canvasGeo = new THREE.PlaneGeometry(finalWidth, finalHeight);
+                        painting = new THREE.Mesh(
+                            canvasGeo,
+                            new THREE.MeshBasicMaterial({ map: tex })
+                        );
+                        painting.position.z = 3;
+                        group.add(painting);
+                    },
+                    undefined,
+                    (err) => {} // Keep default size if image fails to load
+                );
+
+                scene.add(group);
             }
         }
 
-        function onTouchMove(event) {
-            if (event.touches.length === 1 && isUserInteracting) {
-                event.preventDefault();
-                lon = (onPointerDownPointerX - event.touches[0].clientX) * 0.2 + onPointerDownLon;
-                lat = (event.touches[0].clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
-            } else if (event.touches.length === 2) {
-                event.preventDefault();
-                const currentDistance = getPinchDistance(event.touches);
-                if (initialPinchDistance) {
-                    const diff = currentDistance - initialPinchDistance;
-                    fov = Math.max(30, Math.min(100, fov - diff * 0.1));
-                    camera.fov = fov;
-                    camera.updateProjectionMatrix();
-                    initialPinchDistance = currentDistance;
+        // --- 星星繪製 (使用 MeshBasicMaterial 確保夠亮) ---
+        function createStarMesh(name, title) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0,0,512,512);
+
+            // 金色星星
+            ctx.translate(256, 256);
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * 140, -Math.sin((18 + i * 72) * Math.PI / 180) * 140);
+                ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * 60, -Math.sin((54 + i * 72) * Math.PI / 180) * 60);
+            }
+            ctx.closePath();
+            ctx.fillStyle = '#ffd700';
+            ctx.fill();
+
+            // 名字
+            ctx.font = 'bold 50px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText(name, 0, 200);
+
+            // 稱號
+            ctx.font = '30px Arial';
+            ctx.fillStyle = '#ffecb3';
+            ctx.fillText(title, 0, 240);
+
+            // 邊框
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 15;
+            ctx.strokeRect(-250, -250, 500, 500);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            // 改用 BasicMaterial 避免受光照影響變暗
+            const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+            const geometry = new THREE.PlaneGeometry(300, 300);
+            return new THREE.Mesh(geometry, material);
+        }
+
+        function addEntranceText() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#d86a95'; ctx.font = 'bold 100px serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('2025 Timeline', canvas.width / 2, canvas.height / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const planeGeom = new THREE.PlaneGeometry(300, 150);
+            const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+            const textPlane = new THREE.Mesh(planeGeom, planeMat);
+            textPlane.rotation.x = Math.PI / 6; 
+            textPlane.position.set(0, 150, 400); 
+            scene.add(textPlane);
+        }
+
+        // --- 互動邏輯 ---
+        function onMouseClick(event) {
+            if (isDragging) return;
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactableObjects);
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                if(obj.userData.type === 'friend') {
+                    openModal(obj.userData.data);
                 }
             }
         }
 
-        function onTouchEnd() {
-            isUserInteracting = false;
-            initialPinchDistance = null;
+        function openModal(data) {
+            const overlay = document.getElementById('modal-overlay');
+            document.getElementById('modal-name').innerText = data.name;
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal-img').src = data.file;
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.opacity = '1'; document.getElementById('modal-content').style.transform = 'scale(1)'; }, 10);
         }
 
-        function getPinchDistance(touches) {
-            return Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) + Math.pow(touches[0].clientY - touches[1].clientY, 2));
+        function closeModal() {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.style.opacity = '0';
+            document.getElementById('modal-content').style.transform = 'scale(0.8)';
+            setTimeout(() => { overlay.style.display = 'none'; }, 300);
         }
+
+        function onPointerDown(event) {
+            isUserInteracting = true; isDragging = false;
+            onPointerDownPointerX = event.clientX; onPointerDownPointerY = event.clientY;
+            onPointerDownLon = lon; onPointerDownLat = lat;
+        }
+        function onPointerMove(event) {
+            if (isUserInteracting === true) {
+                if (Math.abs(event.clientX - onPointerDownPointerX) > 5) isDragging = true;
+                lon = (onPointerDownPointerX - event.clientX) * 0.1 + onPointerDownLon;
+                lat = (event.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat;
+            }
+        }
+        function onPointerUp() { isUserInteracting = false; }
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isUserInteracting = true; isDragging = false;
+                onPointerDownPointerX = event.touches[0].clientX; onPointerDownPointerY = event.touches[0].clientY;
+                onPointerDownLon = lon; onPointerDownLat = lat;
+            }
+        }
+        function onTouchMove(event) {
+            if (event.touches.length === 1 && isUserInteracting) {
+                isDragging = true; event.preventDefault();
+                lon = (onPointerDownPointerX - event.touches[0].clientX) * 0.2 + onPointerDownLon;
+                lat = (event.touches[0].clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
+            } else if (event.touches.length === 2) { targetZ -= 20; }
+        }
+        function onTouchEnd() { isUserInteracting = false; }
+        function onDocumentMouseWheel(event) { targetZ += event.deltaY * 0.5; }
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -226,126 +528,25 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            update();
-        }
+        function animate() { requestAnimationFrame(animate); update(); }
 
         function update() {
+            cameraZ += (targetZ - cameraZ) * 0.1;
+            // 限制移動範圍 (算到最後一個季節結束)
+            const maxDepth = -(4 * SEASON_LENGTH) - 1000;
+            if (cameraZ > 350) { cameraZ = 350; targetZ = 350; }
+            if (cameraZ < maxDepth) { cameraZ = maxDepth; targetZ = maxDepth; }
+
             lat = Math.max(-85, Math.min(85, lat));
-            phi = THREE.MathUtils.degToRad(90 - lat);
-            theta = THREE.MathUtils.degToRad(lon);
-
-            const x = 500 * Math.sin(phi) * Math.cos(theta);
-            const y = 500 * Math.cos(phi);
-            const z = 500 * Math.sin(phi) * Math.sin(theta);
-
-            camera.lookAt(x, y, z);
-            renderer.render(scene, camera);
-        }
-
-        function setupGyro() {
-            const btn = document.getElementById('gyro-button');
-            const errorEl = document.getElementById('error-msg');
-
-            btn.onclick = () => {
-                if (!window.isSecureContext) {
-                    const isHttps = window.location.protocol === 'https:';
-                    errorEl.innerText = isHttps
-                        ? "当前页面虽是 HTTPS，但证书不受信任（iOS 会视为不安全）。请使用受信任证书的 HTTPS。"
-                        : "重力感应需要 HTTPS（或 localhost）环境，请用 https 方式访问。";
-                    errorEl.style.display = 'block';
-                    return;
-                }
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    Promise.all([
-                        DeviceOrientationEvent.requestPermission(),
-                        (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function')
-                            ? DeviceMotionEvent.requestPermission()
-                            : Promise.resolve('granted')
-                    ])
-                        .then(([orientationState, motionState]) => {
-                            if (orientationState === 'granted' && motionState === 'granted') {
-                                window.addEventListener('deviceorientation', handleOrientation);
-                                btn.style.display = 'none';
-                                errorEl.style.display = 'none';
-                            } else {
-                                showMsg("重力感应权限已被拒绝。你依然可以通过手动滑动屏幕来旋转视角。");
-                            }
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            errorEl.innerText = "无法启动感应，请确保在 HTTPS 环境下访问并允许权限。";
-                            errorEl.style.display = 'block';
-                        });
-                } else {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                    btn.style.display = 'none';
-                }
-            };
-        }
-
-        function handleOrientation(event) {
-            if (isUserInteracting) return;
-            if (baseAlpha === null && event.alpha !== null) {
-                baseAlpha = event.alpha;
-            }
-            if (event.alpha !== null) {
-                lon = (event.alpha - baseAlpha);
-                lat = (event.beta - 90); 
-            }
-        }
-
-        function createFramedPainting(texture, imgWidth, imgHeight) {
-            const group = new THREE.Group();
-
-            const frameThickness = 10;
-            const frameDepth = 2;
-            const frameGeom = new THREE.BoxGeometry(
-                imgWidth + frameThickness,
-                imgHeight + frameThickness,
-                frameDepth
+            let phi = THREE.MathUtils.degToRad(90 - lat);
+            let theta = THREE.MathUtils.degToRad(lon);
+            camera.position.set(0, 0, cameraZ);
+            camera.lookAt(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta) + cameraZ
             );
-            const frameMat = new THREE.MeshBasicMaterial({ color: 0xf7cfe0 });
-            const frame = new THREE.Mesh(frameGeom, frameMat);
-            frame.position.z = -1;
-
-            const matteGeom = new THREE.PlaneGeometry(imgWidth + 6, imgHeight + 6);
-            const matteMat = new THREE.MeshBasicMaterial({ color: 0xfff5f8, side: THREE.DoubleSide });
-            const matte = new THREE.Mesh(matteGeom, matteMat);
-            matte.position.z = 0;
-
-            const planeGeom = new THREE.PlaneGeometry(imgWidth, imgHeight);
-            const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-            const painting = new THREE.Mesh(planeGeom, planeMat);
-            painting.position.z = 0.5;
-
-            group.add(frame);
-            group.add(matte);
-            group.add(painting);
-            return group;
-        }
-
-        function addCeilingText() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#fbe2ea';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#d86a95';
-            ctx.font = 'bold 140px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('2025', canvas.width / 2, canvas.height / 2);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const planeGeom = new THREE.PlaneGeometry(260, 130);
-            const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-            const textPlane = new THREE.Mesh(planeGeom, planeMat);
-            textPlane.rotation.x = Math.PI / 2;
-            textPlane.position.set(0, 240, 0);
-            scene.add(textPlane);
+            renderer.render(scene, camera);
         }
     </script>
 </body>
