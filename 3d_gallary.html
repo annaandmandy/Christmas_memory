@@ -139,12 +139,12 @@
             geometry.scale(-1, 1, 1);
 
             const materials = [
-                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
-                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
-                new THREE.MeshBasicMaterial({ color: 0x222222 }),
-                new THREE.MeshBasicMaterial({ color: 0x0a0a0a }),
-                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
-                new THREE.MeshBasicMaterial({ color: 0x1a1a1a })
+                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 }),
+                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 }),
+                new THREE.MeshBasicMaterial({ color: 0xf3a9c2 }),
+                new THREE.MeshBasicMaterial({ color: 0xfbe2ea }),
+                new THREE.MeshBasicMaterial({ color: 0xf2a0bc }),
+                new THREE.MeshBasicMaterial({ color: 0xf7b6c9 })
             ];
 
             const room = new THREE.Mesh(geometry, materials);
@@ -154,9 +154,9 @@
             imageFiles.forEach((path, index) => {
                 loader.load(path, (texture) => {
                     const aspect = texture.image.width / texture.image.height;
-                    const planeGeom = new THREE.PlaneGeometry(120 * aspect, 120);
-                    const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
-                    const painting = new THREE.Mesh(planeGeom, planeMat);
+                    const imgWidth = 120 * aspect;
+                    const imgHeight = 120;
+                    const painting = createFramedPainting(texture, imgWidth, imgHeight);
 
                     const angle = (index / imageFiles.length) * Math.PI * 2;
                     const radius = 240;
@@ -165,6 +165,8 @@
                     scene.add(painting);
                 });
             });
+
+            addCeilingText();
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
@@ -292,6 +294,58 @@
                 lon = (event.alpha - baseAlpha);
                 lat = (event.beta - 90); 
             }
+        }
+
+        function createFramedPainting(texture, imgWidth, imgHeight) {
+            const group = new THREE.Group();
+
+            const frameThickness = 10;
+            const frameDepth = 2;
+            const frameGeom = new THREE.BoxGeometry(
+                imgWidth + frameThickness,
+                imgHeight + frameThickness,
+                frameDepth
+            );
+            const frameMat = new THREE.MeshBasicMaterial({ color: 0xf7cfe0 });
+            const frame = new THREE.Mesh(frameGeom, frameMat);
+            frame.position.z = -1;
+
+            const matteGeom = new THREE.PlaneGeometry(imgWidth + 6, imgHeight + 6);
+            const matteMat = new THREE.MeshBasicMaterial({ color: 0xfff5f8, side: THREE.DoubleSide });
+            const matte = new THREE.Mesh(matteGeom, matteMat);
+            matte.position.z = 0;
+
+            const planeGeom = new THREE.PlaneGeometry(imgWidth, imgHeight);
+            const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+            const painting = new THREE.Mesh(planeGeom, planeMat);
+            painting.position.z = 0.5;
+
+            group.add(frame);
+            group.add(matte);
+            group.add(painting);
+            return group;
+        }
+
+        function addCeilingText() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fbe2ea';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#d86a95';
+            ctx.font = 'bold 140px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('2025', canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const planeGeom = new THREE.PlaneGeometry(260, 130);
+            const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+            const textPlane = new THREE.Mesh(planeGeom, planeMat);
+            textPlane.rotation.x = Math.PI / 2;
+            textPlane.position.set(0, 240, 0);
+            scene.add(textPlane);
         }
     </script>
 </body>
