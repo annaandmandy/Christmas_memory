@@ -65,6 +65,8 @@
         #modal-img {
             width: 100%;
             height: auto;
+            max-height: 60vh;
+            object-fit: contain;
             border-radius: 8px;
             margin-bottom: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -390,8 +392,139 @@
                 ctx.beginPath(); ctx.moveTo(w / 2 + 20, h / 2 - 10); ctx.lineTo(w / 2 + 40, h / 2 - 10); ctx.lineTo(w / 2 + 30, h / 2 - 30); ctx.fill();
                 // Mouth
                 ctx.beginPath(); ctx.arc(w / 2, h / 2 + 20, 30, 0, Math.PI, false); ctx.fill();
+            },
+
+            // --- Winter ---
+            Snowman: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                const cx = w / 2;
+                const bottomY = h - 20;
+
+                // Body (Bottom)
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(cx, bottomY - 30, 30, 0, Math.PI * 2); ctx.fill();
+                // Body (Middle)
+                ctx.beginPath(); ctx.arc(cx, bottomY - 75, 22, 0, Math.PI * 2); ctx.fill();
+                // Head
+                ctx.beginPath(); ctx.arc(cx, bottomY - 110, 16, 0, Math.PI * 2); ctx.fill();
+
+                // Eyes & Buttons
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(cx - 5, bottomY - 115, 2, 0, Math.PI * 2); // Eye L
+                ctx.arc(cx + 5, bottomY - 115, 2, 0, Math.PI * 2); // Eye R
+                ctx.arc(cx, bottomY - 75, 2, 0, Math.PI * 2); // Button 1
+                ctx.arc(cx, bottomY - 65, 2, 0, Math.PI * 2); // Button 2
+                ctx.fill();
+
+                // Nose
+                ctx.fillStyle = '#e66200';
+                ctx.beginPath(); ctx.moveTo(cx, bottomY - 110); ctx.lineTo(cx + 15, bottomY - 108); ctx.lineTo(cx, bottomY - 106); ctx.fill();
+
+                // Scarf
+                ctx.strokeStyle = '#e63946';
+                ctx.lineWidth = 5;
+                ctx.beginPath(); ctx.moveTo(cx - 12, bottomY - 95); ctx.quadraticCurveTo(cx, bottomY - 85, cx + 12, bottomY - 95); ctx.stroke();
+            },
+
+            // --- Spring ---
+            Butterfly: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                ctx.translate(w / 2, h / 2);
+
+                // Wings
+                ctx.fillStyle = '#cdb4db';
+                ctx.beginPath();
+                ctx.ellipse(-20, -20, 30, 40, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(20, -20, 30, 40, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffc8dd';
+                ctx.beginPath();
+                ctx.ellipse(-15, 20, 20, 25, -Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(15, 20, 20, 25, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Body
+                ctx.fillStyle = '#333';
+                ctx.beginPath(); ctx.ellipse(0, 0, 5, 30, 0, 0, Math.PI * 2); ctx.fill();
+
+                // Antenna
+                ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(0, -25); ctx.quadraticCurveTo(-10, -40, -15, -35); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, -25); ctx.quadraticCurveTo(10, -40, 15, -35); ctx.stroke();
+            },
+
+            // --- Summer ---
+            IceCream: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                const cx = w / 2;
+                const cy = h / 2 + 20;
+
+                // Cone
+                ctx.fillStyle = '#d4a373';
+                ctx.beginPath();
+                ctx.moveTo(cx - 20, cy);
+                ctx.lineTo(cx + 20, cy);
+                ctx.lineTo(cx, cy + 60);
+                ctx.fill();
+
+                // Grid on cone
+                ctx.strokeStyle = '#b07d62'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(cx - 15, cy); ctx.lineTo(cx, cy + 45); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx + 15, cy); ctx.lineTo(cx, cy + 45); ctx.stroke();
+
+                // Scoops
+                ctx.fillStyle = '#ffb7b2';
+                ctx.beginPath(); ctx.arc(cx - 15, cy - 10, 20, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#a2d2ff';
+                ctx.beginPath(); ctx.arc(cx + 15, cy - 10, 20, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fffdd0';
+                ctx.beginPath(); ctx.arc(cx, cy - 25, 22, 0, Math.PI * 2); ctx.fill();
+            },
+
+            // --- Autumn ---
+            Mushroom: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                const cx = w / 2;
+                const cy = h / 2;
+
+                // Stem
+                ctx.fillStyle = '#fefae0';
+                ctx.beginPath();
+                ctx.rect(cx - 15, cy, 30, 50);
+                ctx.fill();
+
+                // Cap (Red top)
+                ctx.fillStyle = '#d90429';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 45, Math.PI, 0);
+                ctx.fill();
+
+                // Dots on cap
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(cx - 20, cy - 20, 6, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx + 20, cy - 15, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(cx, cy - 35, 5, 0, Math.PI * 2); ctx.fill();
             }
         };
+
+        // --- Catchphrases Array ---
+        const catchphrases = [
+            "Anthony: 'HOTPOT?? HOTPOT??'",
+            "Carlos: 'Skibidiiiiiiii.'",
+            "Anna: 'Does this have milk? ... Whatever, I'm eating it.'",
+            "Winni: 'Good morning! (It is 4 PM)'",
+            "Winni: 'Hey Bro'",
+            "Aimee: 'Wanna eat LiuYiShou tomorrow?'",
+            "Erioe: 'Fuck off.'",
+            "Carrie: 'So What?'",
+            "Aska: Whats your shoe size?",
+        ];
 
         function addDecoration(type, x, y, z, rotationY = 0, scale = 1) {
             let tex;
@@ -405,7 +538,9 @@
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, y, z);
             mesh.rotation.y = rotationY;
+            mesh.userData = { type: 'decoration' };
             scene.add(mesh);
+            interactableObjects.push(mesh);
             return mesh;
         }
 
@@ -555,8 +690,11 @@
                     // Christmas Trees in the gaps on walls
                     addDecoration('ChristmasTree', -280, -100, startZ - 600, Math.PI / 2, 2.5);
                     addDecoration('ChristmasTree', 280, -100, startZ - 1000, -Math.PI / 2, 2.5);
+                    // Snowman
+                    addDecoration('Snowman', -290, -200, startZ - 200, Math.PI / 2, 2);
+                    addDecoration('Snowman', 290, -200, startZ - 1400, -Math.PI / 2, 2);
 
-                    // Mistletoes hanging from ceiling (randomized z is fine, ceiling doesn't overlap with wall art)
+                    // Mistletoes hanging from ceiling
                     for (let k = 0; k < 5; k++) {
                         addDecoration('Mistletoe', (Math.random() - 0.5) * 400, 250, startZ - Math.random() * segmentDepth, 0, 1.2);
                     }
@@ -565,14 +703,22 @@
                     addDecoration('Flower', -290, -150, startZ - 200, Math.PI / 2, 1.5);
                     addDecoration('Flower', 290, -150, startZ - 600, -Math.PI / 2, 1.5);
                     addDecoration('Flower', -290, 100, startZ - 1000, Math.PI / 2, 1);
+                    // Butterfly
+                    addDecoration('Butterfly', 290, 100, startZ - 1400, -Math.PI / 2, 1.5);
                 } else if (season.id === 'summer') {
                     // Sun on ceiling
                     const sun = addDecoration('Sun', 0, 280, centerZ, Math.PI / 2, 3);
                     sun.rotation.x = Math.PI / 2; // face down
+                    // Ice Cream
+                    addDecoration('IceCream', -290, -150, startZ - 1000, Math.PI / 2, 1.5);
+                    addDecoration('IceCream', 290, -150, startZ - 400, -Math.PI / 2, 1.5);
                 } else if (season.id === 'autumn') {
                     // Pumpkins on floor/wall edge
                     addDecoration('Pumpkin', -280, -230, startZ - 200, Math.PI / 2, 1.2);
                     addDecoration('Pumpkin', 280, -230, startZ - 1200, -Math.PI / 2, 1.5);
+                    // Mushroom
+                    addDecoration('Mushroom', -290, -200, startZ - 800, Math.PI / 2, 1.3);
+                    addDecoration('Mushroom', 290, -200, startZ - 1400, -Math.PI / 2, 1.3);
                 }
 
                 // *** Add Particle System for this season ***
@@ -741,22 +887,47 @@
             const intersects = raycaster.intersectObjects(interactableObjects);
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
-                if (obj.userData.type === 'friend') {
-                    openModal(obj.userData.data);
-                } else if (obj.userData.type === 'gameButton') {
-                    window.location.href = obj.userData.url;
+                const data = obj.userData;
+
+                if (data.type === 'friend') {
+                    openModal(data.data.name, data.data.title, data.data.desc, data.data.file);
+                } else if (data.type === 'gameButton') {
+                    window.location.href = data.url;
+                } else if (data.type === 'decoration') {
+                    const isPhotoSurprise = Math.random() > 0.2;
+                    if (isPhotoSurprise) {
+                        const randomNum = Math.floor(Math.random() * 60) + 1;
+                        const numStr = randomNum.toString().padStart(2, '0');
+                        const imgPath = `3d_images/surprise/image-${numStr}.jpg`;
+                        openModal("SURPRISE!", "⚠️ EXPOSED ⚠️", "You found a secret memory! Hope you are ready for this...", imgPath);
+                    } else {
+                        const randomQuote = catchphrases[Math.floor(Math.random() * catchphrases.length)];
+                        openModal("Overheard...", "💬 Catchphrase", randomQuote, null);
+                    }
                 }
             }
         }
 
-        function openModal(data) {
+        function openModal(name, title, desc, imgSrc) {
             const overlay = document.getElementById('modal-overlay');
-            document.getElementById('modal-name').innerText = data.name;
-            document.getElementById('modal-title').innerText = data.title;
-            document.getElementById('modal-desc').innerText = data.desc;
-            document.getElementById('modal-img').src = data.file;
+            const imgElement = document.getElementById('modal-img');
+
+            document.getElementById('modal-name').innerText = name;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+
+            if (imgSrc) {
+                imgElement.src = imgSrc;
+                imgElement.style.display = 'block';
+            } else {
+                imgElement.style.display = 'none';
+            }
+
             overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.opacity = '1'; document.getElementById('modal-content').style.transform = 'scale(1)'; }, 10);
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                document.getElementById('modal-content').style.transform = 'scale(1)';
+            }, 10);
         }
 
         function closeModal() {
