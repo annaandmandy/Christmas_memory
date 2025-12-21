@@ -70,6 +70,16 @@
             object-fit: cover;
         }
 
+        .winter-hero {
+            width: 70%;
+            max-width: 450px;
+            aspect-ratio: 3 / 4;
+            margin: 0 auto;
+        }
+        .winter-landscape {
+            aspect-ratio: 4 / 3;
+        }
+
         .photo-caption {
             position: absolute;
             bottom: 6px;
@@ -302,8 +312,8 @@
         <div class="z-20 w-full px-10 text-center">
             <h2 class="section-title text-4xl mb-2">Winter</h2>
             <p class="subtitle mb-12 italic">Silent Frost</p>
-            <div class="photo-frame w-[70%] mx-auto" style="border: 10px solid #fff;">
-                <img src="winter_main.jpg" onerror="this.src='https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=600&q=80'">
+            <div class="photo-frame winter-hero" style="border: 10px solid #fff;">
+                <img src="photos/winter1.jpg" onerror="this.src='https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=600&q=80'">
             </div>
         </div>
     </section>
@@ -311,7 +321,7 @@
     <!-- 4.2 冬 (网格) -->
     <section class="page-section" style="background-color: var(--charcoal);">
         <div class="photo-grid" style="grid-template-columns: 1fr 1fr;">
-            <div class="photo-frame" style="grid-column: span 2;"><img src="winter1.jpg" onerror="this.src='https://images.unsplash.com/photo-1477601263399-79667821d492?auto=format&fit=crop&w=500&q=80'"></div>
+            <div class="photo-frame winter-landscape" style="grid-column: span 2;"><img src="winter1.jpg" onerror="this.src='https://images.unsplash.com/photo-1477601263399-79667821d492?auto=format&fit=crop&w=500&q=80'"></div>
             <div class="photo-frame mt-4"><img src="winter2.jpg" onerror="this.src='https://images.unsplash.com/photo-1418985991508-e47386d96a71?auto=format&fit=crop&w=300&q=80'"></div>
             <div class="photo-frame mt-4"><img src="winter3.jpg" onerror="this.src='https://images.unsplash.com/photo-1454179083322-198bb4da816b?auto=format&fit=crop&w=300&q=80'"></div>
         </div>
