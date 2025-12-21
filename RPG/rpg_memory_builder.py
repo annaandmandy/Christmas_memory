@@ -198,10 +198,7 @@ def setup_claude():
         exit()
 
 def pixelate_image(image_path):
-    """
-    Reads an image, shrinks it to create pixel art effect,
-    and returns the base64 string of the pixelated PNG.
-    """
+
     try:
         with Image.open(image_path) as img:
             # 1. Resize down to lose detail (Mosaic effect)
