@@ -1,49 +1,121 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>2025 四季時光藝廊 (修復版)</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        
-        #ui-layer {
-            position: fixed; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; z-index: 10;
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
+
+        #ui-layer {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+            z-index: 10;
+        }
+
         .instruction {
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 8px 16px; border-radius: 20px;
-            font-size: 12px; letter-spacing: 1px; display: inline-block; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* 彈出視窗樣式 */
         #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-            z-index: 100; display: none;
-            justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
         #modal-content {
-            background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 15px;
-            text-align: center; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
         }
+
         #modal-img {
-            width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        #modal-name { font-size: 24px; font-weight: bold; margin: 0; color: #333; }
-        #modal-title { font-size: 16px; color: #d4a373; font-weight: bold; margin: 5px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; }
-        #modal-desc { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+
+        #modal-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+        #modal-title {
+            font-size: 16px;
+            color: #d4a373;
+            font-weight: bold;
+            margin: 5px 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #modal-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
         #close-btn {
-            background: #333; color: white; border: none; padding: 10px 30px; border-radius: 25px;
-            cursor: pointer; font-weight: bold; font-size: 14px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
         }
-        
-        canvas { cursor: grab; }
-        canvas:active { cursor: grabbing; }
+
+        canvas {
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="ui-layer">
@@ -61,111 +133,108 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+
     <script>
         // --- 1. 資料區 ---
         const friendsData = [
-            { 
-                name: "Carrie", 
-                title: "Chief Cocoa Officer", 
-                file: '3d_images/carrie.jpg', 
-                desc: "Once ate a whole chocolate fondue fountain by herself. Stocks went up." 
+            {
+                name: "Carrie",
+                title: "Chief Cocoa Officer",
+                file: '3d_images/carrie.jpg',
+                desc: "Once ate a whole chocolate fondue fountain by herself. Stocks went up."
             },
-            { 
-                name: "Anna", 
-                title: "The Dairy Gambler", 
-                file: '3d_images/anna.jpg', 
-                desc: "Will risk it all for a slice of tiramisu. Brave soul." 
+            {
+                name: "Anna",
+                title: "The Dairy Gambler",
+                file: '3d_images/anna.jpg',
+                desc: "Will risk it all for a slice of tiramisu. Brave soul."
             },
-            { 
-                name: "Winni", 
-                title: "CEO of 3AM", 
-                file: '3d_images/winni.jpg', 
-                desc: "Hasn't seen the sun since 2024. Operates purely on moonlight." 
+            {
+                name: "Winni",
+                title: "CEO of 3AM",
+                file: '3d_images/winni.jpg',
+                desc: "Hasn't seen the sun since 2024. Operates purely on moonlight."
             },
-            { 
-                name: "Aska", 
-                title: "The Tear Vending Machine", 
-                file: '3d_images/aska.jpg', 
-                desc: "Fluent in multiple languages, but cries in universal. A pure soul who needs a tissue subscription." 
+            {
+                name: "Aska",
+                title: "The Tear Vending Machine",
+                file: '3d_images/aska.jpg',
+                desc: "Fluent in multiple languages, but cries in universal. A pure soul who needs a tissue subscription."
             },
-            { 
-                name: "Carlos", 
-                title: "Lord of Time", 
-                file: '3d_images/carlos.jpg', 
+            {
+                name: "Carlos",
+                title: "Lord of Time",
+                file: '3d_images/carlos.jpg',
                 desc: "Juggles jobs, dating, TAing, and gaming simultaneously. Rumor has it he discovered the 25th hour of the day."
             },
-            { 
-                name: "Anthony", 
-                title: "The Hotpot Evangelist", 
-                file: '3d_images/anthony.jpg', 
-                desc: "Survives on broccoli and chicken breast just to inhale a whole pizza later. His love language is spamming 'HOTPOT?' in the group chat." 
+            {
+                name: "Anthony",
+                title: "The Hotpot Evangelist",
+                file: '3d_images/anthony.jpg',
+                desc: "Survives on broccoli and chicken breast just to inhale a whole pizza later. His love language is spamming 'HOTPOT?' in the group chat."
             },
-            { 
-                name: "Erioe", 
-                title: "The Fragrant Carry", 
-                file: '3d_images/erioe.jpg', 
+            {
+                name: "Erioe",
+                title: "The Fragrant Carry",
+                file: '3d_images/erioe.jpg',
                 desc: "A fashion icon with a PhD in perfumes. He treats every hallway like a runway and always smells expensive."
             },
-           { 
-                name: "Aimee", 
-                title: "The Marathon Caller", 
-                file: '3d_images/aimee.jpg', 
-                desc: "Queen of deals and 3-hour daily calls with her bf. A long-distance warrior who spams us with her boyfriend's cat photos." 
+            {
+                name: "Aimee",
+                title: "The Marathon Caller",
+                file: '3d_images/aimee.jpg',
+                desc: "Queen of deals and 3-hour daily calls with her bf. A long-distance warrior who spams us with her boyfriend's cat photos."
             }
         ];
 
-        // --- 四季配色 (這裡改用更鮮豔一點的顏色，並使用 Basic 材質確保顯示) ---
+        // --- 四季配色 ---
         const seasonsConfig = [
-            { 
-                id: "spring", 
-                floor: '#2d6a4f', wall: '#d8f3dc', ceiling: '#b7e4c7', 
+            {
+                id: "spring",
+                floor: '#2d6a4f', wall: '#d8f3dc', ceiling: '#b7e4c7',
                 artFolder: '3d_images/spring'
             },
-            { 
-                id: "summer", 
-                floor: '#e9c46a', wall: '#caf0f8', ceiling: '#90e0ef', 
+            {
+                id: "summer",
+                floor: '#e9c46a', wall: '#caf0f8', ceiling: '#90e0ef',
                 artFolder: '3d_images/summer'
             },
-            { 
-                id: "autumn", 
-                floor: '#7f5539', wall: '#faedcd', ceiling: '#fefae0', 
+            {
+                id: "autumn",
+                floor: '#7f5539', wall: '#faedcd', ceiling: '#fefae0',
                 artFolder: '3d_images/autumn'
             },
-            { 
-                id: "winter", 
-                floor: '#4a4e69', wall: '#f1faee', ceiling: '#a8dadc', 
+            {
+                id: "winter",
+                floor: '#4a4e69', wall: '#f1faee', ceiling: '#a8dadc',
                 artFolder: '3d_images/winter'
             }
         ];
 
         let scene, camera, renderer;
         let lon = 0, lat = 0;
-        let cameraZ = 0, targetZ = 0; 
-        
+        let cameraZ = 0, targetZ = 0;
+
         // 設定間距
         const SPACING = 800; // 朋友之間的間距
-        const SEASON_LENGTH = 1200; // 每個季節的長度 (固定長度以方便貼牆壁)
-        
+        const SEASON_LENGTH = 1200; // 每個季節的長度
+
         let isUserInteracting = false;
         let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
         let onPointerDownLon = 0, onPointerDownLat = 0;
-        let isDragging = false; 
+        let isDragging = false;
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        const interactableObjects = []; 
-
-        init();
-        animate();
+        const interactableObjects = [];
+        const particles = []; // Store particle systems
 
         function init() {
             scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x000000, 200, 3000); 
+            scene.fog = new THREE.Fog(0x000000, 200, 3000);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
-            
-            // 環境光 (雖然改成Basic材質不需要光，但保留給畫框陰影用)
+
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
 
@@ -197,6 +266,170 @@
             document.addEventListener('wheel', onDocumentMouseWheel, { passive: false });
             window.addEventListener('click', onMouseClick, false);
             window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- Utils: Generate Procedural Textures ---
+        function createTextureFromCanvas(drawFn, width = 256, height = 256) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            drawFn(ctx, width, height);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Decoration Generators
+        const DecorationSet = {
+            ChristmasTree: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                // Tree
+                ctx.fillStyle = '#2d6a4f';
+                ctx.beginPath();
+                ctx.moveTo(w / 2, 20);
+                ctx.lineTo(w - 40, h - 60);
+                ctx.lineTo(40, h - 60);
+                ctx.fill();
+                // Pot
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(w / 2 - 20, h - 60, 40, 40);
+                // Ornaments
+                for (let i = 0; i < 10; i++) {
+                    ctx.beginPath();
+                    ctx.arc(40 + Math.random() * (w - 80), 60 + Math.random() * (h - 120), 8, 0, Math.PI * 2);
+                    ctx.fillStyle = ['#c1121f', '#fdf0d5', '#ffd700'][Math.floor(Math.random() * 3)];
+                    ctx.fill();
+                }
+                // Star
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(w / 2, 20, 10, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            Mistletoe: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                ctx.translate(w / 2, 0);
+                // Leaves
+                ctx.fillStyle = '#55a630';
+                for (let i = 0; i < 6; i++) {
+                    ctx.save();
+                    ctx.rotate(Math.PI / 6 * (i - 2.5));
+                    ctx.beginPath();
+                    ctx.ellipse(0, 60, 20, 50, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                // Berries
+                ctx.fillStyle = '#e63946';
+                ctx.beginPath(); ctx.arc(-15, 60, 10, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(15, 60, 10, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 80, 10, 0, Math.PI * 2); ctx.fill();
+            },
+            Flower: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                // Petals
+                ctx.translate(w / 2, h / 2);
+                ctx.fillStyle = '#fb6f92';
+                for (let i = 0; i < 8; i++) {
+                    ctx.rotate(Math.PI / 4);
+                    ctx.beginPath();
+                    ctx.ellipse(60, 0, 40, 20, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                // Center
+                ctx.fillStyle = '#ffb703';
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            Sun: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                ctx.translate(w / 2, h / 2);
+                // Rays
+                ctx.fillStyle = '#ffbe0b';
+                for (let i = 0; i < 12; i++) {
+                    ctx.rotate(Math.PI / 6);
+                    ctx.fillRect(60, -5, 60, 10);
+                }
+                // Core
+                ctx.fillStyle = '#fb5607';
+                ctx.beginPath();
+                ctx.arc(0, 0, 60, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            Pumpkin: (ctx, w, h) => {
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = '#e66200'; // Orange
+                ctx.beginPath();
+                ctx.ellipse(w / 2, h / 2 + 10, 80, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(w / 2 - 30, h / 2 + 10, 40, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(w / 2 + 30, h / 2 + 10, 40, 60, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Stem
+                ctx.fillStyle = '#4a6fa5';
+                ctx.fillRect(w / 2 - 10, h / 2 - 60, 20, 30);
+                // Eyes
+                ctx.fillStyle = '#222';
+                ctx.beginPath(); ctx.moveTo(w / 2 - 40, h / 2 - 10); ctx.lineTo(w / 2 - 20, h / 2 - 10); ctx.lineTo(w / 2 - 30, h / 2 - 30); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(w / 2 + 20, h / 2 - 10); ctx.lineTo(w / 2 + 40, h / 2 - 10); ctx.lineTo(w / 2 + 30, h / 2 - 30); ctx.fill();
+                // Mouth
+                ctx.beginPath(); ctx.arc(w / 2, h / 2 + 20, 30, 0, Math.PI, false); ctx.fill();
+            }
+        };
+
+        function addDecoration(type, x, y, z, rotationY = 0, scale = 1) {
+            let tex;
+            if (DecorationSet[type]) {
+                tex = createTextureFromCanvas(DecorationSet[type]);
+            } else {
+                return;
+            }
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+            const geo = new THREE.PlaneGeometry(100 * scale, 100 * scale);
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y, z);
+            mesh.rotation.y = rotationY;
+            scene.add(mesh);
+            return mesh;
+        }
+
+        // --- Particle Systems ---
+        function createParticleSystem(type, startZ, depth) {
+            const count = 300;
+            const geom = new THREE.BufferGeometry();
+            const posArray = new Float32Array(count * 3);
+            const speedArray = new Float32Array(count); // Store speed
+
+            for (let i = 0; i < count; i++) {
+                posArray[i * 3] = (Math.random() - 0.5) * 550; // x: wide range
+                posArray[i * 3 + 1] = (Math.random() - 0.5) * 500; // y
+                posArray[i * 3 + 2] = startZ - Math.random() * depth; // z
+                speedArray[i] = 0.5 + Math.random();
+            }
+            geom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            let color = 0xffffff;
+            let size = 4;
+            let op = 0.8;
+
+            if (type === 'spring') { color = 0xffb7b2; size = 6; } // Pink petals
+            if (type === 'summer') { color = 0xffea00; size = 8; op = 0.4; } // Sun dust/pollen
+            if (type === 'autumn') { color = 0xd35400; size = 7; } // Orange leaves
+            if (type === 'winter') { color = 0xffffff; size = 5; } // White snow
+
+            const mat = new THREE.PointsMaterial({
+                color: color,
+                size: size,
+                transparent: true,
+                opacity: op
+            });
+
+            const points = new THREE.Points(geom, mat);
+            scene.add(points);
+
+            particles.push({ mesh: points, type: type, speeds: speedArray, minZ: startZ - depth, maxZ: startZ });
         }
 
         // --- Helper: Create clickable game button ---
@@ -264,26 +497,23 @@
             scene.add(group);
         }
 
-        // --- 核心功能 1: 建立四季環境 (使用 Plane 拼貼，避免黑屏) ---
+        // --- 核心功能 1: 建立四季環境 ---
         function createSeasonalEnvironment() {
-            // 每個季節有固定的長度
-            // 假設每個季節 2500 單位長，足以容納朋友和畫框
-            const segmentDepth = 1600; 
+            const segmentDepth = 1600;
 
             seasonsConfig.forEach((season, index) => {
-                // 計算這一段的起點 Z
                 const startZ = -(index * segmentDepth) + 400;
                 const centerZ = startZ - (segmentDepth / 2);
 
-                // 1. 地板 (Floor) - y = -300
+                // 1. 地板
                 const floorGeo = new THREE.PlaneGeometry(600, segmentDepth);
-                const floorMat = new THREE.MeshBasicMaterial({ color: season.floor }); // 使用 Basic 確保顏色顯示
+                const floorMat = new THREE.MeshBasicMaterial({ color: season.floor });
                 const floor = new THREE.Mesh(floorGeo, floorMat);
                 floor.rotation.x = -Math.PI / 2;
                 floor.position.set(0, -300, centerZ);
                 scene.add(floor);
 
-                // 2. 天花板 (Ceiling) - y = 300
+                // 2. 天花板
                 const ceilGeo = new THREE.PlaneGeometry(600, segmentDepth);
                 const ceilMat = new THREE.MeshBasicMaterial({ color: season.ceiling });
                 const ceil = new THREE.Mesh(ceilGeo, ceilMat);
@@ -291,7 +521,7 @@
                 ceil.position.set(0, 300, centerZ);
                 scene.add(ceil);
 
-                // 3. 左牆 (Left Wall) - x = -300
+                // 3. 左牆
                 const wallGeo = new THREE.PlaneGeometry(segmentDepth, 600);
                 const wallMat = new THREE.MeshBasicMaterial({ color: season.wall });
                 const leftWall = new THREE.Mesh(wallGeo, wallMat);
@@ -299,198 +529,153 @@
                 leftWall.position.set(-300, 0, centerZ);
                 scene.add(leftWall);
 
-                // 4. 右牆 (Right Wall) - x = 300
+                // 4. 右牆
                 const rightWall = new THREE.Mesh(wallGeo, wallMat);
                 rightWall.rotation.y = -Math.PI / 2;
                 rightWall.position.set(300, 0, centerZ);
                 scene.add(rightWall);
 
-                // *** 前牆(入口) - 面向走廊內部 ***
+                // *** Add Decorations based on Season ***
+                // Images are at startZ - 400, -800, -1200. We place decorations in gaps: -200, -600, -1000, -1400.
+                if (season.id === 'winter') {
+                    // Christmas Trees in the gaps on walls
+                    addDecoration('ChristmasTree', -280, -100, startZ - 600, Math.PI / 2, 2.5);
+                    addDecoration('ChristmasTree', 280, -100, startZ - 1000, -Math.PI / 2, 2.5);
+
+                    // Mistletoes hanging from ceiling (randomized z is fine, ceiling doesn't overlap with wall art)
+                    for (let k = 0; k < 5; k++) {
+                        addDecoration('Mistletoe', (Math.random() - 0.5) * 400, 250, startZ - Math.random() * segmentDepth, 0, 1.2);
+                    }
+                } else if (season.id === 'spring') {
+                    // Flowers in gaps
+                    addDecoration('Flower', -290, -150, startZ - 200, Math.PI / 2, 1.5);
+                    addDecoration('Flower', 290, -150, startZ - 600, -Math.PI / 2, 1.5);
+                    addDecoration('Flower', -290, 100, startZ - 1000, Math.PI / 2, 1);
+                } else if (season.id === 'summer') {
+                    // Sun on ceiling
+                    const sun = addDecoration('Sun', 0, 280, centerZ, Math.PI / 2, 3);
+                    sun.rotation.x = Math.PI / 2; // face down
+                } else if (season.id === 'autumn') {
+                    // Pumpkins on floor/wall edge
+                    addDecoration('Pumpkin', -280, -230, startZ - 200, Math.PI / 2, 1.2);
+                    addDecoration('Pumpkin', 280, -230, startZ - 1200, -Math.PI / 2, 1.5);
+                }
+
+                // *** Add Particle System for this season ***
+                createParticleSystem(season.id, startZ, segmentDepth);
+
+                // *** 前牆(入口) ***
                 if (index === 0) {
                     const frontWallGeo = new THREE.PlaneGeometry(600, 600);
                     const frontWallMat = new THREE.MeshBasicMaterial({ color: season.wall });
                     const frontWall = new THREE.Mesh(frontWallGeo, frontWallMat);
-                    frontWall.rotation.y = Math.PI; // 面向 -z (走廊內部)
+                    frontWall.rotation.y = Math.PI;
                     frontWall.position.set(0, 0, startZ);
                     scene.add(frontWall);
 
-                    // Add Matching Game button on front wall
-                    createGameButton(
-                        'Press Here to Play\nMatching Game',
-                        'game/index.html',
-                        0, 0, startZ - 5,
-                        Math.PI
-                    );
+                    createGameButton('Press Here to Play\nMatching Game', 'game/index.html', 0, 0, startZ - 5, Math.PI);
                 }
 
-                // *** 後牆(出口) - 面向走廊內部 ***
+                // *** 後牆(出口) ***
                 if (index === seasonsConfig.length - 1) {
                     const backWallGeo = new THREE.PlaneGeometry(600, 600);
                     const backWallMat = new THREE.MeshBasicMaterial({ color: season.wall });
                     const backWall = new THREE.Mesh(backWallGeo, backWallMat);
-                    // 不需要旋轉,默認面向 -z,正好面向走廊內部
                     backWall.position.set(0, 0, startZ - segmentDepth);
                     scene.add(backWall);
 
-                    // Add RPG Game button on back wall
-                    createGameButton(
-                        'Press Here to Play\nRPG Game',
-                        'RPG/rpg_memories.html',
-                        0, 0, startZ - segmentDepth + 5,
-                        0
-                    );
+                    createGameButton('Press Here to Play\nRPG Game', 'RPG/rpg_memories.html', 0, 0, startZ - segmentDepth + 5, 0);
                 }
-
             });
         }
 
-        // --- 核心功能 2: 建立朋友星星 (解決閃爍問題) ---
+        // --- 核心功能 2: 建立朋友星星 ---
         function createFriendStars() {
             friendsData.forEach((friend, index) => {
                 const zPos = -index * SPACING;
-
                 const star = createStarMesh(friend.name, friend.title);
                 star.rotation.x = -Math.PI / 2;
-                
-                // *** 關鍵修正 ***
-                // 地板 y = -300
-                // 星星 y = -298 (稍微抬高，避免和地板重疊導致閃爍/消失)
-                star.position.set(0, -298, zPos); 
-                
+                star.position.set(0, -298, zPos);
                 star.userData = { type: 'friend', data: friend };
                 scene.add(star);
                 interactableObjects.push(star);
             });
         }
 
-        // --- 核心功能 3: 標準化畫框排列 (左右整齊) ---
+        // --- 核心功能 3: 標準化畫框排列 ---
         function createStandardGallery() {
             const loader = new THREE.TextureLoader();
-            const segmentDepth = 1600; // 必須跟環境長度一致
+            const segmentDepth = 1600;
 
             seasonsConfig.forEach((season, sIndex) => {
-                // 每個季節放 6 張照片 (左右各3張)
                 const imagesPerSide = 3;
-                const totalImages = imagesPerSide * 2;
-                
-                // 這一個季節的 Z 軸起點
                 const seasonStartZ = -(sIndex * segmentDepth) + 400;
-                
-                // 計算每張圖的間隔
                 const gap = segmentDepth / (imagesPerSide + 1);
 
                 for (let i = 0; i < imagesPerSide; i++) {
                     const zPos = seasonStartZ - (gap * (i + 1));
-
-                    // 左牆照片
-                    createSingleFrame(
-                        `${season.artFolder}/image-0${i+1}.jpg`, // 路徑
-                        -295, // x (左牆)
-                        0,    // y (高度)
-                        zPos, // z
-                        true, // isLeft
-                        season.floor // 用地板色當預設底色
-                    );
-
-                    // 右牆照片
-                    createSingleFrame(
-                        `${season.artFolder}/image-0${i+4}.jpg`, // 路徑 (從04, 05, 06...)
-                        295,  // x (右牆)
-                        0,    // y
-                        zPos, 
-                        false,// isRight
-                        season.floor
-                    );
+                    // 左牆
+                    createSingleFrame(`${season.artFolder}/image-0${i + 1}.jpg`, -295, 0, zPos, true, season.floor);
+                    // 右牆
+                    createSingleFrame(`${season.artFolder}/image-0${i + 4}.jpg`, 295, 0, zPos, false, season.floor);
                 }
             });
-            
+
             function createSingleFrame(path, x, y, z, isLeft, fallbackColor) {
                 const group = new THREE.Group();
                 group.position.set(x, y, z);
                 group.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
 
-                // Create temporary placeholder with default size
                 const defaultWidth = 150;
                 const defaultHeight = 110;
                 const frameThickness = 5;
                 const framePadding = 5;
 
-                // 黑框 (will be replaced after image loads)
                 let frameGeo = new THREE.BoxGeometry(defaultWidth + framePadding * 2, defaultHeight + framePadding * 2, frameThickness);
                 const frameMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
                 let frame = new THREE.Mesh(frameGeo, frameMat);
                 group.add(frame);
 
-                // 畫布 (will be resized after image loads)
                 let canvasGeo = new THREE.PlaneGeometry(defaultWidth, defaultHeight);
                 const canvasMat = new THREE.MeshBasicMaterial({ color: fallbackColor });
                 let painting = new THREE.Mesh(canvasGeo, canvasMat);
                 painting.position.z = 3;
                 group.add(painting);
 
-                // Load image and resize frame based on actual image dimensions
-                loader.load(
-                    path,
-                    (tex) => {
-                        // Get actual image dimensions
-                        const img = tex.image;
-                        const imgWidth = img.width;
-                        const imgHeight = img.height;
+                loader.load(path, (tex) => {
+                    const img = tex.image;
+                    const aspectRatio = img.width / img.height;
+                    const maxHeight = 200;
+                    let finalHeight = maxHeight;
+                    let finalWidth = finalHeight * aspectRatio;
+                    const maxWidth = 250;
+                    if (finalWidth > maxWidth) {
+                        finalWidth = maxWidth;
+                        finalHeight = finalWidth / aspectRatio;
+                    }
+                    group.remove(frame);
+                    group.remove(painting);
 
-                        // Calculate size while maintaining aspect ratio
-                        // Max height is 200 units to fit well on the wall
-                        const maxHeight = 200;
-                        const aspectRatio = imgWidth / imgHeight;
+                    frameGeo = new THREE.BoxGeometry(finalWidth + framePadding * 2, finalHeight + framePadding * 2, frameThickness);
+                    frame = new THREE.Mesh(frameGeo, frameMat);
+                    group.add(frame);
 
-                        let finalHeight = maxHeight;
-                        let finalWidth = finalHeight * aspectRatio;
-
-                        // If width is too large, constrain by width instead
-                        const maxWidth = 250;
-                        if (finalWidth > maxWidth) {
-                            finalWidth = maxWidth;
-                            finalHeight = finalWidth / aspectRatio;
-                        }
-
-                        // Remove old geometries
-                        group.remove(frame);
-                        group.remove(painting);
-
-                        // Create new frame with correct size
-                        frameGeo = new THREE.BoxGeometry(
-                            finalWidth + framePadding * 2,
-                            finalHeight + framePadding * 2,
-                            frameThickness
-                        );
-                        frame = new THREE.Mesh(frameGeo, frameMat);
-                        group.add(frame);
-
-                        // Create new painting with correct size and texture
-                        canvasGeo = new THREE.PlaneGeometry(finalWidth, finalHeight);
-                        painting = new THREE.Mesh(
-                            canvasGeo,
-                            new THREE.MeshBasicMaterial({ map: tex })
-                        );
-                        painting.position.z = 3;
-                        group.add(painting);
-                    },
-                    undefined,
-                    (err) => {} // Keep default size if image fails to load
-                );
+                    canvasGeo = new THREE.PlaneGeometry(finalWidth, finalHeight);
+                    painting = new THREE.Mesh(canvasGeo, new THREE.MeshBasicMaterial({ map: tex }));
+                    painting.position.z = 3;
+                    group.add(painting);
+                }, undefined, (err) => { });
 
                 scene.add(group);
             }
         }
 
-        // --- 星星繪製 (使用 MeshBasicMaterial 確保夠亮) ---
         function createStarMesh(name, title) {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 512, 512);
 
-            ctx.clearRect(0,0,512,512);
-
-            // 金色星星
             ctx.translate(256, 256);
             ctx.beginPath();
             for (let i = 0; i < 5; i++) {
@@ -498,27 +683,20 @@
                 ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * 60, -Math.sin((54 + i * 72) * Math.PI / 180) * 60);
             }
             ctx.closePath();
-            ctx.fillStyle = '#ffd700';
-            ctx.fill();
+            ctx.fillStyle = '#ffd700'; ctx.fill();
 
-            // 名字
             ctx.font = 'bold 50px Arial';
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
             ctx.fillText(name, 0, 200);
 
-            // 稱號
             ctx.font = '30px Arial';
             ctx.fillStyle = '#ffecb3';
             ctx.fillText(title, 0, 240);
 
-            // 邊框
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 15;
+            ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 15;
             ctx.strokeRect(-250, -250, 500, 500);
 
             const texture = new THREE.CanvasTexture(canvas);
-            // 改用 BasicMaterial 避免受光照影響變暗
             const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
             const geometry = new THREE.PlaneGeometry(300, 300);
             return new THREE.Mesh(geometry, material);
@@ -530,13 +708,13 @@
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#d86a95'; ctx.font = 'bold 100px serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            
+
             const texture = new THREE.CanvasTexture(canvas);
             const planeGeom = new THREE.PlaneGeometry(300, 150);
             const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
             const textPlane = new THREE.Mesh(planeGeom, planeMat);
-            textPlane.rotation.x = Math.PI / 6; 
-            textPlane.position.set(0, 150, 400); 
+            textPlane.rotation.x = Math.PI / 6;
+            textPlane.position.set(0, 150, 400);
             scene.add(textPlane);
         }
 
@@ -549,10 +727,9 @@
             const intersects = raycaster.intersectObjects(interactableObjects);
             if (intersects.length > 0) {
                 const obj = intersects[0].object;
-                if(obj.userData.type === 'friend') {
+                if (obj.userData.type === 'friend') {
                     openModal(obj.userData.data);
-                } else if(obj.userData.type === 'gameButton') {
-                    // Redirect to the game
+                } else if (obj.userData.type === 'gameButton') {
                     window.location.href = obj.userData.url;
                 }
             }
@@ -615,10 +792,27 @@
 
         function update() {
             cameraZ += (targetZ - cameraZ) * 0.1;
-            // 限制移動範圍 (算到最後一個季節結束)
             const maxDepth = -(4 * SEASON_LENGTH) - 1000;
             if (cameraZ > 350) { cameraZ = 350; targetZ = 350; }
             if (cameraZ < maxDepth) { cameraZ = maxDepth; targetZ = maxDepth; }
+
+            // Particles Animation
+            particles.forEach(sys => {
+                const positions = sys.mesh.geometry.attributes.position.array;
+                for (let i = 0; i < 300; i++) {
+                    positions[i * 3 + 1] -= sys.speeds[i]; // move down
+
+                    if (positions[i * 3 + 1] < -250) {
+                        positions[i * 3 + 1] = 250;
+                    }
+
+                    // Drift for leaves/snow
+                    if (sys.type === 'winter' || sys.type === 'autumn' || sys.type === 'spring') {
+                        positions[i * 3] += Math.sin(Date.now() * 0.001 + i) * 0.5;
+                    }
+                }
+                sys.mesh.geometry.attributes.position.needsUpdate = true;
+            });
 
             lat = Math.max(-85, Math.min(85, lat));
             let phi = THREE.MathUtils.degToRad(90 - lat);
@@ -631,6 +825,11 @@
             );
             renderer.render(scene, camera);
         }
+
+        // Start initialization after all definitions are ready
+        init();
+        animate();
     </script>
 </body>
+
 </html>
