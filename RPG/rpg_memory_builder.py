@@ -16,7 +16,7 @@ ANTHROPIC_API_KEY_ENV = "ANTHROPIC_API_KEY"
 ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
 
 # 2. Folder setup
-INPUT_FOLDER = "my_photos"  # Create this folder and put your images there
+INPUT_FOLDER = "photos"  # Create this folder and put your images there
 OUTPUT_FILE = "rpg_memories.html"
 
 # 3. Image Processing Settings
@@ -269,8 +269,8 @@ def generate_story(image_path):
             "Analyze this image and write a sentences caption describing the scene "
             "as if it is a event, item, a person, or plot point. "
             "eg. Remember that winter day, you are playing with water."
-            "Use retro Lovely memory tone (e.g., 'Back to that day, ...', 'Do you remember? ...'). "
-            "Keep it under 50 words."
+            "Use retro Lovely memory tone (e.g., 'Back to that day, ...', 'Do you remember? ...', (dont always use this start)). "
+            "Keep it under 40 words."
         )
         
         payload = {
