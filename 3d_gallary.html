@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D记忆展厅 - 增强兼容版</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0d0d0d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #ui-layer {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .instruction {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #gyro-button {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 28px;
+            background: #d4a373;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.3s ease;
+        }
+        #gyro-button:active {
+            transform: translateX(-50%) scale(0.95);
+            background: #b88b5d;
+        }
+        #message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 80%;
+            max-width: 300px;
+        }
+        #message-box p { color: #333; margin-bottom: 20px; font-size: 14px; line-height: 1.6; }
+        #message-box button {
+            background: #d4a373;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #error-msg {
+            position: fixed;
+            top: 60px;
+            width: 100%;
+            text-align: center;
+            color: #ff4d4d;
+            font-size: 10px;
+            z-index: 15;
+            display: none;
+        }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div class="instruction">滑动旋转视角 · 双指捏合缩放</div>
+    </div>
+    
+    <div id="error-msg">提示：重力感应需要 HTTPS 环境支持</div>
+    
+    <div id="message-box">
+        <p id="msg-text">开启重力感应可以获得更好的沉浸式体验哦！</p>
+        <button onclick="closeMsg()">我知道了</button>
+    </div>
+    
+    <button id="gyro-button">点击开启感应浏览</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        let scene, camera, renderer;
+        let lon = 0, lat = 0, phi = 0, theta = 0;
+        let fov = 75;
+        
+        let isUserInteracting = false;
+        let onPointerDownPointerX = 0, onPointerDownPointerY = 0;
+        let onPointerDownLon = 0, onPointerDownLat = 0;
+        let initialPinchDistance = null;
+
+        let baseAlpha = null;
+
+        const imageFiles = [
+            '3d_images/image-01.jpg',
+            '3d_images/image-02.jpg',
+            '3d_images/image-03.jpg',
+            '3d_images/image-04.jpg',
+            '3d_images/image-05.jpg'
+        ];
+
+        init();
+        animate();
+
+        function showMsg(text) {
+            document.getElementById('msg-text').innerText = text;
+            document.getElementById('message-box').style.display = 'block';
+        }
+
+        function closeMsg() {
+            document.getElementById('message-box').style.display = 'none';
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 1, 1100);
+            
+            const geometry = new THREE.BoxGeometry(500, 500, 500);
+            geometry.scale(-1, 1, 1);
+
+            const materials = [
+                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
+                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
+                new THREE.MeshBasicMaterial({ color: 0x222222 }),
+                new THREE.MeshBasicMaterial({ color: 0x0a0a0a }),
+                new THREE.MeshBasicMaterial({ color: 0x1a1a1a }),
+                new THREE.MeshBasicMaterial({ color: 0x1a1a1a })
+            ];
+
+            const room = new THREE.Mesh(geometry, materials);
+            scene.add(room);
+
+            const loader = new THREE.TextureLoader();
+            imageFiles.forEach((path, index) => {
+                loader.load(path, (texture) => {
+                    const aspect = texture.image.width / texture.image.height;
+                    const planeGeom = new THREE.PlaneGeometry(120 * aspect, 120);
+                    const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+                    const painting = new THREE.Mesh(planeGeom, planeMat);
+
+                    const angle = (index / imageFiles.length) * Math.PI * 2;
+                    const radius = 240;
+                    painting.position.set(Math.cos(angle) * radius, 10, Math.sin(angle) * radius);
+                    painting.lookAt(0, 10, 0);
+                    scene.add(painting);
+                });
+            });
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            document.addEventListener('touchstart', onTouchStart, { passive: false });
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+            window.addEventListener('resize', onWindowResize);
+
+            setupGyro();
+        }
+
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isUserInteracting = true;
+                onPointerDownPointerX = event.touches[0].clientX;
+                onPointerDownPointerY = event.touches[0].clientY;
+                onPointerDownLon = lon;
+                onPointerDownLat = lat;
+            } else if (event.touches.length === 2) {
+                initialPinchDistance = getPinchDistance(event.touches);
+            }
+        }
+
+        function onTouchMove(event) {
+            if (event.touches.length === 1 && isUserInteracting) {
+                event.preventDefault();
+                lon = (onPointerDownPointerX - event.touches[0].clientX) * 0.2 + onPointerDownLon;
+                lat = (event.touches[0].clientY - onPointerDownPointerY) * 0.2 + onPointerDownLat;
+            } else if (event.touches.length === 2) {
+                event.preventDefault();
+                const currentDistance = getPinchDistance(event.touches);
+                if (initialPinchDistance) {
+                    const diff = currentDistance - initialPinchDistance;
+                    fov = Math.max(30, Math.min(100, fov - diff * 0.1));
+                    camera.fov = fov;
+                    camera.updateProjectionMatrix();
+                    initialPinchDistance = currentDistance;
+                }
+            }
+        }
+
+        function onTouchEnd() {
+            isUserInteracting = false;
+            initialPinchDistance = null;
+        }
+
+        function getPinchDistance(touches) {
+            return Math.sqrt(Math.pow(touches[0].clientX - touches[1].clientX, 2) + Math.pow(touches[0].clientY - touches[1].clientY, 2));
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            update();
+        }
+
+        function update() {
+            lat = Math.max(-85, Math.min(85, lat));
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
+
+            const x = 500 * Math.sin(phi) * Math.cos(theta);
+            const y = 500 * Math.cos(phi);
+            const z = 500 * Math.sin(phi) * Math.sin(theta);
+
+            camera.lookAt(x, y, z);
+            renderer.render(scene, camera);
+        }
+
+        function setupGyro() {
+            const btn = document.getElementById('gyro-button');
+            const errorEl = document.getElementById('error-msg');
+
+            btn.onclick = () => {
+                if (!window.isSecureContext) {
+                    const isHttps = window.location.protocol === 'https:';
+                    errorEl.innerText = isHttps
+                        ? "当前页面虽是 HTTPS，但证书不受信任（iOS 会视为不安全）。请使用受信任证书的 HTTPS。"
+                        : "重力感应需要 HTTPS（或 localhost）环境，请用 https 方式访问。";
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    Promise.all([
+                        DeviceOrientationEvent.requestPermission(),
+                        (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function')
+                            ? DeviceMotionEvent.requestPermission()
+                            : Promise.resolve('granted')
+                    ])
+                        .then(([orientationState, motionState]) => {
+                            if (orientationState === 'granted' && motionState === 'granted') {
+                                window.addEventListener('deviceorientation', handleOrientation);
+                                btn.style.display = 'none';
+                                errorEl.style.display = 'none';
+                            } else {
+                                showMsg("重力感应权限已被拒绝。你依然可以通过手动滑动屏幕来旋转视角。");
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            errorEl.innerText = "无法启动感应，请确保在 HTTPS 环境下访问并允许权限。";
+                            errorEl.style.display = 'block';
+                        });
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    btn.style.display = 'none';
+                }
+            };
+        }
+
+        function handleOrientation(event) {
+            if (isUserInteracting) return;
+            if (baseAlpha === null && event.alpha !== null) {
+                baseAlpha = event.alpha;
+            }
+            if (event.alpha !== null) {
+                lon = (event.alpha - baseAlpha);
+                lat = (event.beta - 90); 
+            }
+        }
+    </script>
+</body>
+</html>
