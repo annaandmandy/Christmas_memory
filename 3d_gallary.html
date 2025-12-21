@@ -199,6 +199,71 @@
             window.addEventListener('resize', onWindowResize);
         }
 
+        // --- Helper: Create clickable game button ---
+        function createGameButton(text, url, x, y, z, rotationY) {
+            const group = new THREE.Group();
+            group.position.set(x, y, z);
+            group.rotation.y = rotationY;
+
+            // Create button background
+            const buttonWidth = 300;
+            const buttonHeight = 150;
+            const buttonGeo = new THREE.PlaneGeometry(buttonWidth, buttonHeight);
+            const buttonMat = new THREE.MeshBasicMaterial({
+                color: 0x4a90e2,
+                transparent: true,
+                opacity: 0.9
+            });
+            const button = new THREE.Mesh(buttonGeo, buttonMat);
+            group.add(button);
+
+            // Create text canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#4a90e2';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+            // Text
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const lines = text.split('\n');
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText(lines[0], canvas.width / 2, canvas.height / 2 - 30);
+
+            ctx.font = 'bold 50px Arial';
+            ctx.fillText(lines[1], canvas.width / 2, canvas.height / 2 + 30);
+
+            // Apply texture
+            const texture = new THREE.CanvasTexture(canvas);
+            const textMat = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true
+            });
+            const textMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(buttonWidth, buttonHeight),
+                textMat
+            );
+            textMesh.position.z = 1;
+            group.add(textMesh);
+
+            // Make it interactive - set userData on the mesh itself
+            textMesh.userData = { type: 'gameButton', url: url };
+            interactableObjects.push(textMesh);
+
+            scene.add(group);
+        }
+
         // --- 核心功能 1: 建立四季環境 (使用 Plane 拼貼，避免黑屏) ---
         function createSeasonalEnvironment() {
             // 每個季節有固定的長度
@@ -248,6 +313,14 @@
                     frontWall.rotation.y = Math.PI; // 面向 -z (走廊內部)
                     frontWall.position.set(0, 0, startZ);
                     scene.add(frontWall);
+
+                    // Add Matching Game button on front wall
+                    createGameButton(
+                        'Press Here to Play\nMatching Game',
+                        'game/index.html',
+                        0, 0, startZ - 5,
+                        Math.PI
+                    );
                 }
 
                 // *** 後牆(出口) - 面向走廊內部 ***
@@ -258,6 +331,14 @@
                     // 不需要旋轉,默認面向 -z,正好面向走廊內部
                     backWall.position.set(0, 0, startZ - segmentDepth);
                     scene.add(backWall);
+
+                    // Add RPG Game button on back wall
+                    createGameButton(
+                        'Press Here to Play\nRPG Game',
+                        'RPG/rpg_memories.html',
+                        0, 0, startZ - segmentDepth + 5,
+                        0
+                    );
                 }
 
             });
@@ -449,7 +530,6 @@
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = '#d86a95'; ctx.font = 'bold 100px serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('2025 Timeline', canvas.width / 2, canvas.height / 2);
             
             const texture = new THREE.CanvasTexture(canvas);
             const planeGeom = new THREE.PlaneGeometry(300, 150);
@@ -471,6 +551,9 @@
                 const obj = intersects[0].object;
                 if(obj.userData.type === 'friend') {
                     openModal(obj.userData.data);
+                } else if(obj.userData.type === 'gameButton') {
+                    // Redirect to the game
+                    window.location.href = obj.userData.url;
                 }
             }
         }
