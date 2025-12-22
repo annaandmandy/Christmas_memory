@@ -3,174 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2025 Memory Hallway/title>
-        <style>
-            body {
-                margin: 0;
-                overflow: hidden;
-                background-color: #000;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            }
+    <title>2025 Memory Hallway</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-            #ui-layer {
-                position: fixed;
-                top: 20px;
-                width: 100%;
-                text-align: center;
-                color: white;
-                pointer-events: none;
-                z-index: 10;
-            }
+        #ui-layer {
+            position: fixed;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-            .instruction {
-                background: rgba(0, 0, 0, 0.6);
-                backdrop-filter: blur(5px);
-                padding: 8px 16px;
-                border-radius: 20px;
-                font-size: 12px;
-                letter-spacing: 1px;
-                display: inline-block;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
+        .instruction {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-            /* 彈出視窗樣式 */
-            #modal-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.85);
-                backdrop-filter: blur(8px);
-                z-index: 100;
-                display: none;
-                justify-content: center;
-                align-items: center;
+        /* 彈出視窗樣式 */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #modal-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        #modal-img {
+            width: 100%;
+            height: auto;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: none;
+        }
+
+        #modal-img.slide-in {
+            animation: slideInFromLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                transform: translateX(-100%);
                 opacity: 0;
-                transition: opacity 0.3s ease;
             }
 
-            #modal-content {
-                background: white;
-                width: 90%;
-                max-width: 400px;
-                padding: 20px;
-                border-radius: 15px;
-                text-align: center;
-                transform: scale(0.8);
-                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                position: relative;
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
+        }
 
-            #modal-img {
-                width: 100%;
-                height: auto;
-                max-height: 60vh;
-                object-fit: contain;
-                border-radius: 8px;
-                margin-bottom: 15px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                transition: none;
-            }
+        #modal-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
 
-            #modal-img.slide-in {
-                animation: slideInFromLeft 0.5s ease-out;
-            }
+        #modal-title {
+            font-size: 16px;
+            color: #d4a373;
+            font-weight: bold;
+            margin: 5px 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-            @keyframes slideInFromLeft {
-                from {
-                    transform: translateX(-100%);
-                    opacity: 0;
-                }
+        #modal-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
 
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
+        #close-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
 
-            #modal-name {
-                font-size: 24px;
-                font-weight: bold;
-                margin: 0;
-                color: #333;
-            }
+        .slideshow-controls {
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
 
-            #modal-title {
-                font-size: 16px;
-                color: #d4a373;
-                font-weight: bold;
-                margin: 5px 0 15px 0;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
+        .slideshow-controls.active {
+            display: flex;
+        }
 
-            #modal-desc {
-                font-size: 14px;
-                color: #666;
-                line-height: 1.6;
-                margin-bottom: 20px;
-                font-style: italic;
-            }
+        .nav-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
 
-            #close-btn {
-                background: #333;
-                color: white;
-                border: none;
-                padding: 10px 30px;
-                border-radius: 25px;
-                cursor: pointer;
-                font-weight: bold;
-                font-size: 14px;
-            }
+        .nav-btn:hover {
+            background: #357abd;
+        }
 
-            .slideshow-controls {
-                display: none;
-                justify-content: center;
-                gap: 15px;
-                margin: 10px 0;
-            }
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
 
-            .slideshow-controls.active {
-                display: flex;
-            }
+        #slide-counter {
+            color: #666;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 15px;
+        }
 
-            .nav-btn {
-                background: #4a90e2;
-                color: white;
-                border: none;
-                padding: 8px 20px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-weight: bold;
-                font-size: 14px;
-                transition: background 0.3s;
-            }
+        canvas {
+            cursor: grab;
+        }
 
-            .nav-btn:hover {
-                background: #357abd;
-            }
-
-            .nav-btn:disabled {
-                background: #ccc;
-                cursor: not-allowed;
-            }
-
-            #slide-counter {
-                color: #666;
-                font-size: 14px;
-                font-weight: bold;
-                padding: 8px 15px;
-            }
-
-            canvas {
-                cursor: grab;
-            }
-
-            canvas:active {
-                cursor: grabbing;
-            }
-        </style>
+        canvas:active {
+            cursor: grabbing;
+        }
+    </style>
 </head>
 
 <body>
