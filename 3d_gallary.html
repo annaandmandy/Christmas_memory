@@ -210,52 +210,52 @@
         // --- 1. 資料區 ---
         const friendsData = [
             {
-                name: "Carrie",
-                title: "Chief Cocoa Officer",
-                file: '3d_images/carrie.jpg',
-                desc: "Once ate a whole chocolate fondue fountain by herself. Stocks went up."
+                name: "PokeBowl",
+                title: "First Date",
+                file: '3d_images/pokebowl.jpeg',
+                desc: "First time you met me you shaked my hand like a business man."
             },
             {
-                name: "Anna",
-                title: "The Dairy Gambler",
-                file: '3d_images/anna.jpg',
-                desc: "Will risk it all for a slice of tiramisu. Brave soul."
+                name: "Ramen",
+                title: "Second Date",
+                file: '3d_images/Ramen.jpeg',
+                desc: "Still the best Ramen in Boston."
             },
             {
-                name: "Winni",
-                title: "CEO of 3AM",
-                file: '3d_images/winni.jpg',
-                desc: "Hasn't seen the sun since 2024. Operates purely on moonlight."
+                name: "Ice Skating",
+                title: "Still Second Date",
+                file: '3d_images/skate.jpeg',
+                desc: "I think my coach gave up on me.🧐"
             },
             {
-                name: "Aska",
-                title: "The Tear Vending Machine",
-                file: '3d_images/aska.jpg',
-                desc: "Fluent in multiple languages, but cries in universal. A pure soul who needs a tissue subscription."
+                name: "Zoo",
+                title: "Cold Winter",
+                file: '3d_images/zoo.jpeg',
+                desc: "No lion and giraffe this time, but cute Lemur."
             },
             {
-                name: "Carlos",
-                title: "Lord of Time",
-                file: '3d_images/carlos.jpg',
-                desc: "Juggles jobs, dating, TAing, and gaming simultaneously. Rumor has it he discovered the 25th hour of the day."
+                name: "Salem",
+                title: "Summer time!",
+                file: '3d_images/salem.jpeg',
+                desc: "Good weather and good picture."
             },
             {
-                name: "Anthony",
-                title: "The Hotpot Evangelist",
-                file: '3d_images/anthony.jpg',
-                desc: "Survives on broccoli and chicken breast just to inhale a whole pizza later. His love language is spamming 'HOTPOT?' in the group chat."
+                name: "Marathon",
+                title: "Suceeded and improved",
+                file: '3d_images/marathon.jpeg',
+                desc: "Thanks to my encouraging coach that makes me run faster than last time."
             },
             {
-                name: "Erioe",
-                title: "The Fragrant Carry",
-                file: '3d_images/erioe.jpg',
-                desc: "A fashion icon with a PhD in perfumes. He treats every hallway like a runway and always smells expensive."
+                name: "Halloween",
+                title: "Chuckies",
+                file: '3d_images/halloween.jpeg',
+                desc: "Hi, I'm Chucky, want to play"
             },
             {
-                name: "Aimee",
-                title: "The Marathon Caller",
-                file: '3d_images/aimee.jpg',
-                desc: "Queen of deals and 3-hour daily calls with her bf. A long-distance warrior who spams us with her boyfriend's cat photos."
+                name: "Cruise Trip",
+                title: "Sleeping Time",
+                file: '3d_images/Cruise.jpeg',
+                desc: "I missed Bahamas great weather sooooooo much."
             }
         ];
 
@@ -334,9 +334,6 @@
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-
-            // 標題
-            addEntranceText();
 
             // 事件監聽
             document.addEventListener('mousedown', onPointerDown, false);
@@ -624,19 +621,6 @@
             }
         };
 
-        // --- Catchphrases Array ---
-        const catchphrases = [
-            "Anthony: 'HOTPOT?? HOTPOT??'",
-            "Carlos: 'Skibidiiiiiiii.'",
-            "Anna: 'Does this have milk? ... Whatever, I'm eating it.'",
-            "Winni: 'Good morning! (It is 4 PM)'",
-            "Winni: 'Hey Bro'",
-            "Aimee: 'Wanna eat LiuYiShou tomorrow?'",
-            "Erioe: 'Fuck off.'",
-            "Carrie: 'So What?'",
-            "Aska: Whats your shoe size?",
-        ];
-
         function addDecoration(type, x, y, z, rotationY = 0, scale = 1) {
             let tex;
             if (DecorationSet[type]) {
@@ -848,7 +832,8 @@
                     frontWall.position.set(0, 0, startZ);
                     scene.add(frontWall);
 
-                    createGameButton('Press Here to Play\nMatching Game', 'game/index.html', 0, 0, startZ - 5, Math.PI);
+                    addEntranceText("Memory Hallway", 0, 50, startZ - 2, Math.PI);
+                    addEntranceText("for C & A", 0, 10, startZ - 2, Math.PI);
                 }
 
                 // *** 後牆(出口) ***
@@ -859,7 +844,7 @@
                     backWall.position.set(0, 0, startZ - segmentDepth);
                     scene.add(backWall);
 
-                    createGameButton('Press Here to Play\nRPG Game', 'RPG/rpg_memories.html', 0, 0, startZ - segmentDepth + 5, 0);
+                    addEntranceText("Happy Anniversary!", 0, 50, startZ - segmentDepth + 1, 0);
                 }
             });
         }
@@ -977,19 +962,35 @@
             return new THREE.Mesh(geometry, material);
         }
 
-        function addEntranceText() {
+        function addEntranceText(text, x, y, z, rotationY = 0) {
             const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 256;
+            canvas.width = 1024; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#d86a95'; ctx.font = 'bold 100px serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Set text style
+            ctx.fillStyle = '#d86a95';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Handle multi-line text
+            const lines = text.split('\n');
+            const lineHeight = 120;
+            const startY = canvas.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+
+            lines.forEach((line, index) => {
+                ctx.font = 'bold 100px serif';
+                ctx.fillText(line, canvas.width / 2, startY + (index * lineHeight));
+            });
 
             const texture = new THREE.CanvasTexture(canvas);
-            const planeGeom = new THREE.PlaneGeometry(300, 150);
+            const planeGeom = new THREE.PlaneGeometry(400, 200);
             const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
             const textPlane = new THREE.Mesh(planeGeom, planeMat);
-            textPlane.rotation.x = Math.PI / 6;
-            textPlane.position.set(0, 150, 400);
+            textPlane.position.set(x, y, z);
+            textPlane.rotation.y = rotationY;
             scene.add(textPlane);
         }
 
@@ -1006,32 +1007,33 @@
 
                 if (data.type === 'friend') {
                     openModal(data.data.name, data.data.title, data.data.desc, data.data.file);
-                } else if (data.type === 'gameButton') {
-                    window.location.href = data.url;
-                } else if (data.type === 'special_sundai') {
-                    // Initialize slideshow with all 5 sundai images
-                    slideshowImages = [
-                        "3d_images/sundai-01.jpg",
-                        "3d_images/sundai-02.jpg",
-                        "3d_images/sundai-03.jpg",
-                        "3d_images/sundai-04.jpg",
-                        "3d_images/sundai-05.jpg"
-                    ];
-                    currentSlideIndex = 0;
-                    slideshowActive = true;
-                    openModal("Sundai Club Surprise!", "Merry Christmas Everyone!", "Enjoy this special holiday treat!", slideshowImages[0]);
-                } else if (data.type === 'decoration') {
-                    const isPhotoSurprise = Math.random() > 0.2;
-                    if (isPhotoSurprise) {
-                        const randomNum = Math.floor(Math.random() * 60) + 1;
-                        const numStr = randomNum.toString().padStart(2, '0');
-                        const imgPath = `3d_images/surprise/image-${numStr}.jpg`;
-                        openModal("SURPRISE!", "⚠️ EXPOSED ⚠️", "You found a secret memory! Hope you are ready for this...", imgPath);
-                    } else {
-                        const randomQuote = catchphrases[Math.floor(Math.random() * catchphrases.length)];
-                        openModal("Overheard...", "💬 Catchphrase", randomQuote, null);
-                    }
-                }
+                } 
+                // else if (data.type === 'gameButton') {
+                //     window.location.href = data.url;
+                // } else if (data.type === 'special_sundai') {
+                //     // Initialize slideshow with all 5 sundai images
+                //     slideshowImages = [
+                //         "3d_images/sundai-01.jpg",
+                //         "3d_images/sundai-02.jpg",
+                //         "3d_images/sundai-03.jpg",
+                //         "3d_images/sundai-04.jpg",
+                //         "3d_images/sundai-05.jpg"
+                //     ];
+                //     currentSlideIndex = 0;
+                //     slideshowActive = true;
+                //     openModal("Sundai Club Surprise!", "Merry Christmas Everyone!", "Enjoy this special holiday treat!", slideshowImages[0]);
+                // } else if (data.type === 'decoration') {
+                //     const isPhotoSurprise = Math.random() > 0.2;
+                //     if (isPhotoSurprise) {
+                //         const randomNum = Math.floor(Math.random() * 60) + 1;
+                //         const numStr = randomNum.toString().padStart(2, '0');
+                //         const imgPath = `3d_images/surprise/image-${numStr}.jpg`;
+                //         openModal("SURPRISE!", "⚠️ EXPOSED ⚠️", "You found a secret memory! Hope you are ready for this...", imgPath);
+                //     } else {
+                //         const randomQuote = catchphrases[Math.floor(Math.random() * catchphrases.length)];
+                //         openModal("Overheard...", "💬 Catchphrase", randomQuote, null);
+                //     }
+                // }
             }
         }
 
